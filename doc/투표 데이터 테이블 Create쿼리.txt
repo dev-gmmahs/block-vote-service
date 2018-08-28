@@ -1,4 +1,4 @@
-CREATE TABLE VOTE_DATA (
+CREATE TABLE Vote_Data (
        UniqueNumberSeq VARCHAR(20),
        Vote_JoinDate DATETIME,
        Vote_Item VARCHAR(300),
