@@ -1,0 +1,9 @@
+CREATE TABLE VOTE_DATA (
+       UniqueNumberSeq VARCHAR(20),
+       Vote_JoinDate DATETIME,
+       Vote_Item VARCHAR(300),
+       nonce INT,
+       Hash VARCHAR(32),
+       Prev_Hash VARCHAR(32),
+       PRIMARY KEY(UniqueNumberSeq)
+);
