@@ -1,5 +1,0 @@
-Create Table Vote_Item (
-       UniqueNumberSeq VARCHAR(20),
-       Vote_Item VARCHAR(300),
-       PRIMARY KEY(UniqueNumberSeq)
-);
