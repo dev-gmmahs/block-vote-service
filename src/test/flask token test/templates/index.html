@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Flask 토큰예제</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+    
+    $(function () {
+
+      // 제출 버튼 이벤트
+      $('#send').click(function () {
+        const name = $('#name').val()
+        const ps = $('#ps').val()
+        $.post({
+          url: '/login',
+          data: {
+            username: name,
+            password: ps
+          },
+          dataType: 'json',
+          success: function (res) {
+            token = res.access_token
+            alert('토큰발급성공: ' + token)
+          },
+          error: function (e) {
+            console.log(e)
+          }
+        })
+      })
+      
+      // 엑세스 테스트 버튼 이벤트
+      $('#priv').click(function () {
+        if (token) {
+          $.get({
+            url: '/protected',
+            dataType: 'json',
+            beforeSend : function(xhr){
+              xhr.setRequestHeader("Authorization", "Bearer " + token)
+            },
+            success (res) {
+              alert(res.logged_in_as + '님 접근 완료')
+            },
+            error (e) {
+              console.log(e)
+              alert(e)
+            }
+          })
+        } else {
+          alert('엑세스 토큰을 먼저 발급받아주세요')
+        }
+      })
+    })
+    
+    </script>
+  </head>
+  <body>
+    <input id="name" type="text" name="username" placeholder="이름">
+    <br>
+    <input id="ps" type="password" name="password" placeholder="비밀번호">
+    <br>
+    <input id="send" type="submit" value="제출">
+    <br>
+    <br>
+    <input id="priv" type="submit" value="엑세스 테스트">
+  </body>
+</html>
