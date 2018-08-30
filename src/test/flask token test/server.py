@@ -6,12 +6,15 @@ Flask 토큰 인증 예제입니다.
 
 from flask import Flask, jsonify, request, render_template
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+import datetime
 
 app = Flask(__name__)
 
 # Flask-JWT-Extended 설정
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # 서버 비밀 키 (서비스 시 변경!)
 jwt = JWTManager(app)
+
+print()
 
 @app.route('/', methods=['GET'])
 def main():
@@ -32,8 +35,11 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
+    # 토큰 유효시간 10초로 지정
+    expire = datetime.timedelta(seconds=10)
+
     # Identity는 JSON으로 직렬화가능한 데이터로 지정가능
-    access_token = create_access_token(identity=username)
+    access_token = create_access_token(identity=username, expires_delta=expire)
 
     # 출력
     print("아이디: {}, 비밀번호: {}\n엑세스 토큰: {}\n".format(username, password, access_token))
@@ -55,6 +61,16 @@ def protected():
 
     # 클라이언트에게 사용자 ID 전달
     return jsonify(logged_in_as=current_user), 200
+
+
+# 토큰이 만료되었을 경우
+@jwt.expired_token_loader
+def expired_token():
+    return jsonify({
+        'status': 401,
+        'sub_status': 42,
+        'msg': '토큰 만료 됨'
+    }), 401
 
 
 if __name__ == '__main__':
