@@ -3,7 +3,7 @@
 # block-vote-service
 블록체인 투표 서비스 프로젝트 저장소입니다.
 
-<img src="./profile.jpg">
+<img src="./profile.png">
 
 </div>
 
