@@ -25,6 +25,7 @@ CREATE TABLE Vote_Information (
   Vote_JoinCode VARCHAR(10),            -- 투표 참여코드
   VoteStart DateTime NOT NULL,          -- 투표 시작일
   VoteEnd DateTime NOT NUll,            -- 투표 마감일
+  VoteCreated INT NOT NULL,             -- 투표 정상적으로 생성여부
   PRIMARY KEY(UniqueNumberSeq)
 );
 
