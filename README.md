@@ -1,5 +1,11 @@
+<div align="center">
+
 # block-vote-service
 블록체인 투표 서비스 프로젝트 저장소입니다.
+
+<img src="./profile.jpg">
+
+</div>
 
 # 팀 정보
 - 김지호
