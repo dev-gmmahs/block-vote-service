@@ -1,29 +1,57 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
+    <vote-header :fill="fill"/>
     <router-view/>
   </div>
 </template>
 
+<script>
+import Header from '@/components/Header.vue'
+
+export default {
+  name: 'app',
+  data () {
+    return {
+      fill: false
+    }
+  },
+  components: {
+    'vote-header': Header
+  },
+  created () {
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  destroyed () {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
+  methods: {
+    handleScroll (event) {
+      if (window.scrollY >= 100) {
+        this.fill = true
+      } else {
+        this.fill = false
+      }
+    }
+  }
+}
+</script>
+
+
 <style lang="scss">
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+  width: 100%;
+  height: 100%;
 }
 </style>
