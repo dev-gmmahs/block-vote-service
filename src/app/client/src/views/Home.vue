@@ -16,12 +16,27 @@
       <h2>정보</h2>
       <div class="info-image">
         <img src="@/assets/vote.png">
+        <br>
+        <div>
+          <p class="img-title">투표</p>
+          누구나 참여할 수 있습니다
+        </div>
       </div>
       <div class="info-image">
         <img src="@/assets/lock.png">
+        <br>
+        <div>
+          <p class="img-title">보안</p>
+          누구나 참여할 수 있습니다
+        </div>
       </div>
       <div class="info-image">
         <img src="@/assets/smile.png">
+        <br>
+        <div>
+          <p class="img-title">편리</p>
+          회원가입 후 간편하게 참여가능합니다
+        </div>
       </div>
     </div>
     <div class="content darker">
@@ -42,13 +57,9 @@ export default {
 
 <style lang="scss">
 
-@media screen and (max-width: 320px) {
-  .info-image {
-
-    img {
-      width: 100%;
-    }
-  }
+.img-title {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .home {
@@ -56,17 +67,39 @@ export default {
   height: 100%;
 
   .content {
-    padding: 20px 0px;
+    padding: 20px;
+
 
     &.darker {
       background-color: #eee;
     }
 
     .info-image {
-      display: inline;
+      display: inline-block;
+      box-sizing: border-box;
+      width: 20%;
+      padding: 5%;
+      margin-bottom: 30px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
 
       img {
-        width: 25%;
+        width: 100%;
+      }
+
+      div {
+        display: inline-block;
+      }
+    }
+
+    @media screen and (max-width: 768px) {
+      .info-image {
+        display: block;
+        width: 100%;
+
+        img {
+          width: 60%;
+        }
       }
     }
   }
