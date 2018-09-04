@@ -27,7 +27,7 @@
         <br>
         <div>
           <p class="img-title">보안</p>
-          누구나 참여할 수 있습니다
+          안전하게 검증한 후 저장합니다
         </div>
       </div>
       <div class="info-image">
@@ -69,7 +69,6 @@ export default {
   .content {
     padding: 20px;
 
-
     &.darker {
       background-color: #eee;
     }
@@ -79,7 +78,7 @@ export default {
       box-sizing: border-box;
       width: 20%;
       padding: 5%;
-      margin-bottom: 30px;
+      margin: 15px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       border-radius: 10px;
 
@@ -96,6 +95,8 @@ export default {
       .info-image {
         display: block;
         width: 100%;
+        margin: 0;
+        margin-bottom: 30px;
 
         img {
           width: 60%;
@@ -119,7 +120,7 @@ export default {
     background: -webkit-linear-gradient(-45deg, #62f760 0%,#3b74e5 100%); /* Chrome10-25,Safari5.1-6 */
     background: linear-gradient(135deg, #62f760 0%,#3b74e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#62f760', endColorstr='#3b74e5',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-  
+
     .vote-code-area {
       position: absolute;
       top: 28%;
@@ -177,8 +178,6 @@ export default {
       margin-left: -40px;
       animation: arrow .8s alternate infinite;
     }
-
-    
   }
 }
 
