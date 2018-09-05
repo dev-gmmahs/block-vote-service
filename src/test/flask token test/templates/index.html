@@ -53,6 +53,29 @@
           alert('엑세스 토큰을 먼저 발급받아주세요')
         }
       })
+
+      // 액세스 테스트 버튼 이벤트
+      $('#out').click(function () {
+        if (token) {
+          $.get({
+            url: '/logout',
+            dataType: 'json',
+            beforeSend : function(xhr){
+              xhr.setRequestHeader("Authorization", "Bearer " + token)
+            },
+            success (res) {
+              alert('로그아웃 OK')
+            },
+            error (e) {
+              token = null
+              console.log(e)
+              alert(e.responseJSON.msg)
+            }
+          })
+        } else {
+          alert('엑세스 토큰을 먼저 발급받아주세요')
+        }
+      })
     })
     
     </script>
@@ -67,6 +90,7 @@
     <br>
     <br>
     <input id="priv" type="submit" value="액세스 테스트">
+    <input id="out" type="submit" value="로그아웃">
     <p>생성된 토큰은 10초간 유지됩니다.</p>
   </body>
 </html>
