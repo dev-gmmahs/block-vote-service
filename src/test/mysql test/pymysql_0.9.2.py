@@ -17,6 +17,9 @@ result = cur.fetchall()
 # 쿼리 결과 출력
 print(result)
 
+cur.execute("INSERT INTO test VALUES (%s)", ("test_v"))
+print(cur.execute("INSERT INTO test VALUES (%s)", ("test_v")))
+
 # 사용 후 close()
 cur.close()
 conn.close()

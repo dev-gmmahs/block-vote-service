@@ -1,15 +1,16 @@
 <template>
   <div id="login">
     <div class="gradient-header"></div>
-    <div class="panel vertical-half">
+    <div class="panel">
       <h2>로그인</h2>
       <form @submit.prevent="submit">
         <div class="input-area">
-          <input v-model="id" placeholder="ID" required>
+          <input v-model="id" placeholder="아이디" required>
         </div>
         <div class="input-area">
-          <input v-model="password" type="password" autocomplete="password" placeholder="Password" required>
+          <input v-model="password" type="password" autocomplete="password" placeholder="비밀번호" required>
         </div>
+        <div class="login-message">{{ msg }}</div>
         <div class="input-area">
           <button>로그인</button>
         </div>
@@ -25,19 +26,24 @@ export default {
   data () {
     return {
       id: '',
-      password: ''
+      password: '',
+      msg: ''
     }
   },
   methods: {
+    /**
+     * @description 서버에 로그인 요청
+     */
     submit () {
       this.$http.post('/login', { id: this.id, password: this.password }).then(r => {
-        if (r.token) {
-          console.log(r)
-          this.$state.commt('SET_TOKEN', r.token)
-          this.$state.commt('SET_NAME', r.name)
+        this.msg = ''
+        if (r.data.token) {
+          this.$store.commit('SET_TOKEN', r.data.token)
+          this.$router.push({ name: 'home' })
         }
       }).catch(e => {
-        console.log(e)
+        console.dir(e)
+        this.msg = '다시 입력해주세요'
       })
     }
   }
@@ -47,19 +53,14 @@ export default {
 <style lang="scss">
 #login {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
+}
 
-  .panel {
-    a {
-      cursor: pointer;
-      text-decoration: none;
-      color: #888;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-  }
+.login-message {
+  height: 30px;
 }
 </style>

@@ -14,8 +14,6 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'super-secret'  # 서버 비밀 키 (서비스 시 변경!)
 jwt = JWTManager(app)
 
-print()
-
 @app.route('/', methods=['GET'])
 def main():
     return render_template("index.html")
@@ -55,6 +53,7 @@ def login():
 def protected():
     # get_jwt_identity를 사용하여 현재 사용자의 ID에 액세스합니다.
     current_user = get_jwt_identity()
+    print(request.headers["Authorization"].split()[1])
 
     # 출력
     print("{} 접근 성공".format(current_user))

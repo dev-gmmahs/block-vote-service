@@ -1,6 +1,7 @@
 USE Vote;
 
 -- DROP TABLE UserTable;
+-- DROP TABLE UserLogin;
 -- DROP TABLE Vote_Data;
 -- DROP TABLE Vote_Information;
 -- DROP TABLE Vote_Item;
@@ -15,6 +16,13 @@ CREATE TABLE UserTable (
   Salt VARCHAR(16) NOT NULL,      -- 암호화 Salt
   UserName VARCHAR(10) NOT NULL,  -- 유저 이름
   UserNumber VARCHAR(13) NOT NULL,-- 유저 주민등록번호
+  PRIMARY KEY(UserIDSeq)
+);
+
+CREATE TABLE UserLogin (
+  UserIDSeq VARCHAR(20) NOT NULL, -- 유저 고유 ID
+  Token VARCHAR(400) NOT NULL,    -- 유저 토큰
+  GetTime DateTime NOT NULL,      -- 토큰 발행 시간
   PRIMARY KEY(UserIDSeq)
 );
 

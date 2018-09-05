@@ -27,7 +27,7 @@
         <br>
         <div>
           <p class="img-title">보안</p>
-          안전하게 검증한 후 저장합니다
+          안전하게 저장합니다
         </div>
       </div>
       <div class="info-image">
@@ -35,12 +35,12 @@
         <br>
         <div>
           <p class="img-title">편리</p>
-          회원가입 후 간편하게 참여가능합니다
+          빠르고 쉽게 참여가능합니다
         </div>
       </div>
     </div>
     <div class="content darker">
-      Hello
+      <h2>투표 생성하기</h2>
     </div>
     <footer>
       <div>Copyright (c) 2018 GMMAHS Community</div>
@@ -77,13 +77,13 @@ export default {
       display: inline-block;
       box-sizing: border-box;
       width: 20%;
-      padding: 5%;
+      padding: 2%;
       margin: 15px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       border-radius: 10px;
 
       img {
-        width: 100%;
+        width: 70%;
       }
 
       div {
