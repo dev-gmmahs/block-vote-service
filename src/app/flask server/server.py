@@ -5,8 +5,10 @@ import datetime
 import hashlib
 import random
 import string
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 md5 = hashlib.md5()
 md5.update("sample".encode())
@@ -133,7 +135,46 @@ def expired_token():
 @app.route("/create/vote", methods=["POST"])
 @jwt_required
 def create():
-	return "<h1>Hello create</h1>"
+    req = request.get_json()
+    
+    # 중복되지않는 투표 고유 ID 생성
+    while True:
+        vote_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE UniqueNumberSeq = %s", (vote_id)).pop()
+        if count["COUNT"] == 0:
+            break
+
+    # 중복되지않는 투표 참여 코드 생성
+    while True:
+        vote_code = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE Vote_JoinCode = %s", (vote_code)).pop()
+        if count["COUNT"] == 0:
+            break
+
+    # 투표 명
+    namev = req["vote_name"]
+
+    # 투표 시작시간
+    startv = "%s %s:00:00" % (req["vote_start"], str(req["vote_start_time"]).rjust(2, "0"))
+
+    # 투표 종료시간
+    endv = "%s %s:00:00" % (req["vote_end"], str(req["vote_end_time"]).rjust(2, "0"))
+
+    # 투표 참여 권한 (0: 아무나, 1: 지정)
+    permissionv = req["vote_permission"]
+
+    # 투표 참여 인원
+    limit = req["vote_limit"]
+
+    # 투표 생성
+    affected = db.update("""
+    INSERT INTO Vote_Information VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """, (vote_id, namev, get_jwt_identity(), vote_code, startv, endv, permissionv, limit, 0))
+    
+    if affected == 0:
+        return jsonify({"success": False, "code": ""}), 500
+
+    return jsonify({"success": True, "code": vote_code}), 200
 
 # 투표 결과 라우팅
 @app.route("/info/vote/result", methods=["GET"])
@@ -166,4 +207,4 @@ def join(code):
 if __name__ == "__main__":
     # 데이터베이스 인스턴스 생성
 	db = database_manager("localhost", 3306, "root", "1234", "vote")
-	app.run(debug=True)
+	app.run(debug=True, host='0.0.0.0', port='80')
