@@ -82,7 +82,7 @@
           <button class="able" @click="view = 1">뒤로가기</button>
         </div>
         <div v-else-if="view === 3">
-          <h2>님 환영합니다</h2>
+          <h2>투표가 생성되었습니다</h2>
         </div>
       </transition>
       <div class="message-area">
@@ -257,10 +257,21 @@ export default {
      * @description 새 투표 생성 데이터 제출
      */
     submit () {
-      this.$http.post('/create/vote', { sample: 'test' }).then(result => {
-        console.log(r.data)
+      this.$http.post('/create/vote', {
+        vote_name: this.voteName,
+        vote_start: this.startDate,
+        vote_start_time: this.startTime,
+        vote_end: this.endDate,
+        vote_end_time: this.endTime,
+        vote_permission: this.voteTarget,
+        vote_limit: this.limitCount
+      }, {
+        headers: { Authorization: "Bearer " + this.$store.state.token }
+      }).then(result => {
+        console.log(result.data)
       }).catch(e => {
-        console.log(e)
+        this.msg = e.message
+        this.view = 2
       })
     },
     /**
