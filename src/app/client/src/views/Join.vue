@@ -274,40 +274,6 @@ export default {
   font-size: 0.8rem;
 }
 
-.disable {
-  cursor: not-allowed;
-  padding: 5px 10px;
-  border-radius: 5px;
-  outline: none;
-  border: 2px solid #eee;
-  background-color: transparent;
-  margin: 20px 0;
-}
-
-.able {
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 5px;
-  outline: none;
-  border: 2px solid dodgerblue;
-  background-color: transparent;
-  margin: 20px 0;
-  transition: .5s;
-}
-
-.able:hover {
-  background-color: dodgerblue;
-  color: #fff;
-}
-
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-}
-
 .message-area {
   font-weight: bold;
   font-size: 0.9rem;

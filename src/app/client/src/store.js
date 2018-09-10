@@ -5,7 +5,9 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: ''
+    token: '',
+    noticeMessage: '',
+    noticeOpened: false
   },
   mutations: {
     SET_TOKEN (state, token) {

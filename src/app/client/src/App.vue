@@ -97,7 +97,7 @@ html, body {
 
 @media screen and (max-width: 768px) {
   .panel {
-    width: 80%;
+    width: 90%;
   }
 }
 
@@ -121,7 +121,7 @@ html, body {
   button {
     cursor: pointer;
     outline: none;
-    border: 2px solid #eee;
+    border: 2px solid dodgerblue;
     padding: 8px 14px;
     background-color: transparent;
     color: #888;
@@ -130,9 +130,37 @@ html, body {
   }
 
   button:hover {
+    background-color: dodgerblue;
+    color: #fff;
+  }
+
+  textarea {
+    resize: none;
+    outline: none;
+    border: 2px solid #eee;
+    padding: 8px 14px;
+    background-color: transparent;
+    color: #888;
+    border-radius: 5px;
+    transition: .5s;
+  }
+
+  textarea:hover {
     border: 2px solid #aaa;
-    background-color: #aaa;
-    color: #eee;
+  }
+
+  label {
+    margin-right: 10px;
+  }
+
+  select {
+    outline: none;
+    border: 2px solid #eee;
+    padding: 8px 14px;
+    background-color: transparent;
+    color: #888;
+    border-radius: 5px;
+    margin-left: 10px;
   }
 }
 
@@ -189,5 +217,39 @@ html, body {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+
+.disable {
+  cursor: not-allowed;
+  padding: 5px 10px;
+  border-radius: 5px;
+  outline: none;
+  border: 2px solid #eee;
+  background-color: transparent;
+  margin: 20px 0;
+}
+
+.able {
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  outline: none;
+  border: 2px solid dodgerblue;
+  background-color: transparent;
+  margin: 20px 0;
+  transition: .5s;
+}
+
+.able:hover {
+  background-color: dodgerblue;
+  color: #fff;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>
