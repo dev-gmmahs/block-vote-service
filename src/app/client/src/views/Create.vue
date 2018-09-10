@@ -83,6 +83,10 @@
         </div>
         <div v-else-if="view === 3">
           <h2>투표가 생성되었습니다</h2>
+          <div class="message-area">
+            <p>투표 코드</p>
+            <h1>{{ voteCode }}</h1>
+          </div>
         </div>
       </transition>
       <div class="message-area">
@@ -119,7 +123,8 @@ export default {
       limit: 0,
       limitCount: 5,
       alreadyInList: false,
-      msg: ''
+      msg: '',
+      voteCode: ''
     }
   },
   components: {
@@ -266,9 +271,15 @@ export default {
         vote_permission: this.voteTarget,
         vote_limit: this.limitCount
       }, {
-        headers: { Authorization: "Bearer " + this.$store.state.token }
+        headers: { Authorization: 'Bearer ' + this.$store.state.token }
       }).then(result => {
-        console.log(result.data)
+        if (result.data.success) {
+          this.voteCode = result.data.code
+          this.view = 3
+        } else {
+          this.msg = '투표를 생성하지 못했습니다.'
+          this.view = 2
+        }
       }).catch(e => {
         this.msg = e.message
         this.view = 2
