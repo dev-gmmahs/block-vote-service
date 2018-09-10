@@ -5,6 +5,7 @@
     <router-link to="/join" id="home-link" v-if="path === 'home' && !isLogined">회원가입</router-link>
     <a id="logout-link" v-if="path === 'home' && isLogined" @click="logout">로그아웃</a>
     <router-link to="/mypage" id="info-link" v-if="path === 'home' && isLogined">내 정보</router-link>
+    <router-link to="/create" id="info-link" v-if="path === 'home' && isLogined">투표 생성</router-link>
   </div>
 </template>
 
