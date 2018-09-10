@@ -3,6 +3,8 @@ from database import database_manager
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import datetime
 import hashlib
+import random
+import string
 
 app = Flask(__name__)
 
@@ -36,8 +38,15 @@ def vote():
 def regist():
     req = request.get_json()
 
-    s_id = "test"
-    salt = "test"
+    salt = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+
+    # 중복되지않는 SID 생성
+    while True:
+        s_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
+        r = db.execute("SELECT COUNT(*) AS COUNT FROM UserTable WHERE UserIDSeq = %s", (s_id))
+        if r.pop()["COUNT"] == 0:
+            break
+
 
     id_ = req["id"]
     password = req["password"]
@@ -59,7 +68,7 @@ def regist():
     if result is 0:
         return jsonify({"success": False, "already": False}), 200
     
-    print("User registered")
+    print("User registered:", s_id)
 
     return jsonify({"success": True, "already": False})
 
@@ -81,6 +90,7 @@ def login():
 	""", (id_, id_, password))
 
     if len(result) == 0:
+        print("Unknown user")
         return jsonify({"msg": "Unknown user"}), 400
     elif len(result) > 1:
         return jsonify({"msg": "User data error"}), 500
