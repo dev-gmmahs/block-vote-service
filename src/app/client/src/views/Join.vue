@@ -10,7 +10,7 @@
           <h2>제 1 장 총칙</h2>
           <br>
           <h3>제 1 조 (목적)</h3>
-          <p>본 약관은 ○○○이 운영하는 웹 사이트 (http://xxx.xxx.xxx)의 제반 서비스의 이용조건 및 절차에 관한 사항 및 기타 필요한 사항을 규정함을 목적으로 한다.</p>
+          <p>본 약관은 김지호가 운영하는 웹 사이트 (http://xxx.xxx.xxx)의 제반 서비스의 이용조건 및 절차에 관한 사항 및 기타 필요한 사항을 규정함을 목적으로 한다.</p>
           <br>
           <h3>제 2 조 (용어의 정의)</h3>
           <p>본 약관에서 사용하는 용어는 다음과 같이 정의한다.<br>
@@ -24,8 +24,8 @@
           ②본 약관 및 차후 회사사정에 따라 변경된 약관은 이용자에게 공시함으로써 효력을 발생한다.</p>
           <br>
           <h3>제 4 조 (약관 외 준칙)</h3>
-          <p>본 약관에 명시되지 않은 사항이 전기통신기본법, 전기통신사업법, 정보통신촉진법, ‘전자상거래등에서의 소비자 보호에 관한 법률’, 
-          ‘약관의 규제에관한법률’, ‘전자거래기본법’, ‘전자서명법’, ‘정보통신망 이용촉진등에 관한 법률’, 
+          <p>본 약관에 명시되지 않은 사항이 전기통신기본법, 전기통신사업법, 정보통신촉진법, ‘전자상거래등에서의 소비자 보호에 관한 법률’,
+          ‘약관의 규제에관한법률’, ‘전자거래기본법’, ‘전자서명법’, ‘정보통신망 이용촉진등에 관한 법률’,
           ‘소비자보호법’ 등 기타 관계 법령에 규정되어 있을 경우에는 그 규정을 따르도록 한다.</p>
           <br><br>
           <h2>제 2 장 이용계약</h2>
@@ -190,6 +190,11 @@ export default {
   },
   computed: {
     done () {
+      return this.check()
+    }
+  },
+  methods: {
+    check () {
       if (!this.id.match(/^[a-z0-9]{6,20}$/)) {
         this.msg = '아이디는 영문 소문자, 숫자 조합으로 6~20길이 입니다.'
         return false
@@ -217,9 +222,7 @@ export default {
 
       this.msg = ''
       return true
-    }
-  },
-  methods: {
+    },
     /**
      * @description 서버에 회원가입 요청
      */
@@ -228,8 +231,8 @@ export default {
         return
       }
       this.alreadySubmit = true
-      this.$http.post('/info/login/regist', { 
-        id: this.id, 
+      this.$http.post('/info/login/regist', {
+        id: this.id,
         password: this.password_1,
         name: this.name,
         resident: this.resident_1 + this.resident_2

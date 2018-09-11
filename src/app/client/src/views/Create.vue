@@ -131,7 +131,7 @@ export default {
     'item': Item
   },
   created () {
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 0; i < 24; i++) {
       this.hours.push(i)
     }
     const currentTime = new Date()
@@ -143,6 +143,14 @@ export default {
   },
   computed: {
     voteCheck () {
+      return this.check()
+    },
+    voteItemCheck () {
+      return this.itemCheck()
+    }
+  },
+  methods: {
+    check () {
       if (!this.voteName.match(/^[a-zA-Z가-힣0-9 ]{5,50}$/)) {
         this.msg = '투표 명은 영문, 한글, 숫자 조합으로 5~50길이 입니다.'
         return false
@@ -169,49 +177,49 @@ export default {
       const d = date.getDate()
       const h = date.getHours()
 
-      const s_date = new Date(this.startDate)
-      const e_date = new Date(this.endDate)
+      const Sdate = new Date(this.startDate)
+      const Edate = new Date(this.endDate)
 
-      if (y > s_date.getFullYear()) {
+      if (y > Sdate.getFullYear()) {
         this.msg = '지정한 년도(Year)는 시작일에 사용할 수 없습니다.'
         return false
       }
 
-      if (m > s_date.getMonth() + 1) {
+      if (m > Sdate.getMonth() + 1) {
         this.msg = '지정한 월(Month)는 시작일에 사용할 수 없습니다.'
         return false
       }
 
-      if (d > s_date.getDate() && m === s_date.getMonth() + 1 && y >= s_date.getFullYear()) {
+      if (d > Sdate.getDate() && m === Sdate.getMonth() + 1 && y >= Sdate.getFullYear()) {
         this.msg = '지정한 일(Day)는 시작일에 사용할 수 없습니다.'
         return false
       }
 
-      if (h > this.startTime && d === s_date.getDate() && m === s_date.getMonth() + 1) {
+      if (h > this.startTime && d === Sdate.getDate() && m === Sdate.getMonth() + 1) {
         this.msg = '지정한 시간에 시작할 수 없습니다.'
         return false
       }
 
-      if (e_date.getFullYear() < s_date.getFullYear()) {
+      if (Edate.getFullYear() < Sdate.getFullYear()) {
         this.msg = '마감일은 시작일과 같거나 빠를 수 없습니다.'
         return false
       }
 
-      if (e_date.getMonth() < s_date.getMonth() && e_date.getFullYear() === s_date.getFullYear()) {
+      if (Edate.getMonth() < Sdate.getMonth() && Edate.getFullYear() === Sdate.getFullYear()) {
         this.msg = '마감일은 시작일과 같거나 빠를 수 없습니다.'
         return false
       }
 
-      if (e_date.getMonth() === s_date.getMonth() &&
-          e_date.getFullYear() === s_date.getFullYear() &&
-          e_date.getDate() < s_date.getDate()) {
+      if (Edate.getMonth() === Sdate.getMonth() &&
+          Edate.getFullYear() === Sdate.getFullYear() &&
+          Edate.getDate() < Sdate.getDate()) {
         this.msg = '마감일은 시작일과 같거나 빠를 수 없습니다.'
         return false
       }
 
-      if (e_date.getMonth() === s_date.getMonth() &&
-          e_date.getFullYear() === s_date.getFullYear() &&
-          e_date.getDate() === s_date.getDate()) {
+      if (Edate.getMonth() === Sdate.getMonth() &&
+          Edate.getFullYear() === Sdate.getFullYear() &&
+          Edate.getDate() === Sdate.getDate()) {
         if (this.endTime <= this.startTime) {
           this.msg = '마감일은 시작일과 같거나 빠를 수 없습니다.'
           return false
@@ -221,7 +229,7 @@ export default {
       this.msg = ''
       return true
     },
-    voteItemCheck () {
+    itemCheck () {
       if (this.limit === 1 && this.voteTarget === 1 && this.limitCount > this.targetList.length) {
         this.msg = '참여자 ID를 모두 입력해주세요'
         return false
@@ -229,9 +237,7 @@ export default {
 
       this.msg = ''
       return true
-    }
-  },
-  methods: {
+    },
     toZero (n) {
       n = n.toString()
       if (n.length !== 2) {
@@ -367,7 +373,7 @@ hr {
   border: 0;
   border-top: 1px solid #ccc;
   margin: 1em 0;
-  padding: 0; 
+  padding: 0;
 }
 
 .option-area {

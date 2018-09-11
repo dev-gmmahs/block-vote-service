@@ -4,8 +4,8 @@
       <div class="vote-code-area">
         <h1>투표에 참여하세요!</h1>
         <div class="code-input-area">
-          <input type="text" placeholder="참여코드">
-          <button>V</button>
+          <input type="text" v-model.trim="joinCode" @keydown="keydown" placeholder="참여코드">
+          <button @click="join">V</button>
         </div>
       </div>
       <div class="bottom-area">
@@ -51,7 +51,32 @@
 <script>
 
 export default {
-  name: 'home'
+  name: 'home',
+  data () {
+    return {
+      joinCode: ''
+    }
+  },
+  methods: {
+    keydown (ev) {
+      if (ev.keyCode === 13) {
+        this.join()
+      }
+    },
+    join () {
+      this.$http.get('/join/' + this.joinCode, {}, {
+        headers: { Authorization: 'Bearer ' + this.$store.state.token }
+      }).then(result => {
+        if (result.data.info) {
+          this.$router.push({ path: '/join' })
+        } else {
+          alert('참여 실패')
+        }
+      }).catch(e => {
+        alert(e)
+      })
+    }
+  }
 }
 </script>
 
