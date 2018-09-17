@@ -68,12 +68,13 @@ export default {
         headers: { Authorization: 'Bearer ' + this.$store.state.token }
       }).then(result => {
         if (result.data.info) {
-          this.$router.push({ path: '/join' })
+          this.$router.push({ path: '/vote' })
         } else {
           alert('참여 실패')
         }
       }).catch(e => {
         alert(e)
+        this.$router.push({ path: '/vote' })
       })
     }
   }
