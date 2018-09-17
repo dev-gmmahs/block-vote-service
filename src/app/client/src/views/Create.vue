@@ -112,6 +112,7 @@ export default {
       view: 0,
       hours: [],
       targetList: [],
+      items: [],
       voteName: '',
       voteIntro: '',
       startDate: '',
@@ -275,7 +276,9 @@ export default {
         vote_end: this.endDate,
         vote_end_time: this.endTime,
         vote_permission: this.voteTarget,
-        vote_limit: this.limitCount
+        vote_limit: this.limitCount,
+        vote_target: this.targetList,
+        vote_item: this.items
       }, {
         headers: { Authorization: 'Bearer ' + this.$store.state.token }
       }).then(result => {
