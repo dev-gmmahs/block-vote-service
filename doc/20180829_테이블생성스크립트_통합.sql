@@ -7,7 +7,7 @@ USE Vote;
 -- DROP TABLE Vote_Item;
 -- DROP TABLE Vote_User;
 
--- 20180905 수정 / 이근혁
+-- 20180923 수정 / 이근혁
 
 CREATE TABLE UserTable (
   UserIDSeq VARCHAR(20) NOT NULL, -- 유저 고유 ID
@@ -58,10 +58,7 @@ CREATE TABLE Vote_Item (
 );
 
 CREATE TABLE Vote_User (
-  UserIDSeq VARCHAR(10) NOT NULL,       -- 투표 참여자 고유 아이디
+  UserID VARCHAR(10) NOT NULL,       -- 투표 참여자 아이디
   UniqueNumberSeq VARCHAR(20) NOT NULL, -- 투표 고유번호
-  JoinName VARCHAR(10) NOT NULL,        -- 투표자 명
-  JoinPhone VARCHAR(11) NOT NULL,       -- 투표자 전화번호
-  JoinAlready INT NOT NULL,             -- 투표 참여 여부
-  PRIMARY KEY(UniqueUserSeq)
+  JoinAlready INT NOT NULL              -- 투표 참여 여부
 );

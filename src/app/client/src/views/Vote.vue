@@ -29,13 +29,22 @@ export default {
   name: 'vote',
   data () {
     return {
+      verified: false,
       msg: '',
       view: 0,
-      items: []
+      voteName: '',
+      voteFounder: '',
+      voteStart: null,
+      voteEnd: null,
+      voteItems: []
     }
   },
   created () {
-    alert(this.$route.params)
+    if (!this.$store.state.voteCode) {
+      alert('잘못된 접근')
+      this.$router.push({ path: '/' })
+      return
+    }
   }
 }
 </script>

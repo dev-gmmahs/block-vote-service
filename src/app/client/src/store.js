@@ -15,7 +15,7 @@ export default new Vuex.Store({
       state.token = token
     },
     LOGOUT (state) {
-      state.token =  ''
+      state.token = ''
     },
     SET_VOTE_CODE (state, code) {
       state.voteCode = code

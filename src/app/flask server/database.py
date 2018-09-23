@@ -8,10 +8,8 @@ class database_manager():
     # 초기화 메소드
     # 인스턴스 생성 시 데이터베이스 정보를 입력받고 커넥션 생성
     def __init__(self, host: str, port: int, user: str, password: str, db: str):
-        try:
-            self.conn = pymysql.connect(host=host, port=port, user=user, password=password, db=db)
-        except:
-            print("데이터베이스 커넥션 생성 오류")
+        self.conn = pymysql.connect(host=host, port=port, user=user, password=password, db=db)
+
 
     # 데이터베이스 쿼리 함수 SELECT
     def execute(self, query_string: str, args: tuple=None):
@@ -34,6 +32,3 @@ class database_manager():
         cur.close()
 
         return affectedRows
-
-
-

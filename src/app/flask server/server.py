@@ -168,15 +168,15 @@ def create():
         # 중복되지않는 투표 고유 ID 생성
         while True:
             vote_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
-            count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE UniqueNumberSeq = %s", (vote_id)).pop()
-            if count["COUNT"] == 0:
+            count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE UniqueNumberSeq = %s", (vote_id))
+            if count.pop()["COUNT"] == 0:
                 break
 
         # 중복되지않는 투표 참여 코드 생성
         while True:
             vote_code = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
-            count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE Vote_JoinCode = %s", (vote_code)).pop()
-            if count["COUNT"] == 0:
+            count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE Vote_JoinCode = %s", (vote_code))
+            if count.pop()["COUNT"] == 0:
                 break
 
         # 투표 명
@@ -191,19 +191,42 @@ def create():
         # 투표 참여 권한 (0: 아무나, 1: 지정)
         permissionv = req["vote_permission"]
 
+        # 투표 참여자ID 목록
+        targetv = req["vote_target"]
+
         # 투표 참여 인원
         limit = req["vote_limit"]
+
+        # 투표 항목
+        itemv = ",".join(req["vote_item"])
 
         # 투표 생성
         affected = db.update("""
         INSERT INTO Vote_Information VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (vote_id, namev, get_jwt_identity(), vote_code, startv, endv, permissionv, limit, 0))
         
-        if affected == 0:
+        affected_item = db.update("""
+        INSERT INTO Vote_Item VALUES (%s, %s)
+        """, (vote_id, itemv))
+
+        # 지정된 투표자만 투표가 가능할 경우 명단에 ID 추가
+        if permissionv == 1:
+            for target in targetv:
+                try:
+                    db.update("""
+                    INSERT INTO Vote_User VALUES (%s, %s, %s)
+                    """, (target, vote_id, 0))
+                except Exception as e:
+                    print(e)
+
+        # 투표 정보 추가 또는 투표 항목 추가를 실패한 경우
+        if affected == 0 or affected_item == 0:
             return jsonify({"success": False, "code": ""}), 500
 
+        # 정상적으로 처리 됨
         return jsonify({"success": True, "code": vote_code}), 200
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({"success": False, "code": ""}), 500
 
 
@@ -213,6 +236,61 @@ def create():
 def result():
     result = accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1])
     return "<h1>Hello {}</h1>".format(str(result))
+
+
+# 투표 정보조회 라우팅
+@app.route("/join/<code>", methods=["GET"])
+@jwt_required
+def vote_info(code):
+    print(code)
+    try:
+        sid = get_jwt_identity()
+        if not accessCheck(sid, request.headers["Authorization"].split()[1]):
+            return jsonify({"permission": False, "overlimit": False, "data": {}}), 401
+
+        vote_data = db.execute("""
+        SELECT UniqueNumberSeq, VoteName, u.UserID, u.UserName, VoteStart, VoteEnd, VotePermission, VoteLimit, VoteCreated 
+        FROM Vote_Information i, UserTable u WHERE Vote_JoinCode = %s
+        """, (code))
+
+        # 만약 조회된 투표가 없을 경우
+        if len(vote_data) == 0:
+            return jsonify({"permission": False, "overlimit": False, "data": {}}), 404
+
+        # 지정한 유저만 투표할 수 있는 경우 ID가 등록되어있는지 확인
+        if vote_data[0]["VotePermission"] == 1:
+            check = db.execute("""
+            SELECT COUNT(*) AS COUNT FROM Vote_User 
+            WHERE UniqueNumberSeq = %s AND UserID = (SELECT UserID FROM UserTable WHERE UserIDSeq = %s) AND JoinAlready = 0
+            """, (vote_data[0]["UniqueNumberSeq"], sid))
+
+            # 참여자 명단에 ID가 없을 경우
+            if check.pop()["COUNT"] is not 1:
+                return jsonify({"permission": False, "overlimit": False, "data": {}}), 401
+        # 아무나 참여 가능한 투표인 경우
+        else:
+            pass
+
+        # 전체 참여자 수 제한
+        total = db.execute("""
+        SELECT VoteLimit FROM Vote_Information WHERE UniqueNumberSeq = %s
+        """, (vote_data[0]["UniqueNumberSeq"]))
+
+        # 참여자 제한이 0인 경우 제한 없음, 5 이상인 경우 제한 있음
+        if total[0]["VoteLimit"] >= 5:
+            # 현재 참여자 수
+            participated = db.execute("""
+            SELECT COUNT(*) AS COUNT FROM Vote_User WHERE UniqueNumberSeq = %s AND JoinAlready = 1
+            """, (vote_data[0]["UniqueNumberSeq"]))
+
+            # 만약 현재 참여자 수가 전체 참여자수보다 크거나 같을 경우 더이상 참여 불가능
+            if total[0]["VoteLimit"] <= participated[0]["COUNT"]:
+                return jsonify({"permission": True, "overlimit": True, "data": {}}), 200
+
+        return jsonify({"permission": True, "overlimit": False, "data": vote_data[0]}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"permission": False, "overlimit": False, "data": {}}), 500
 
 # 이미지
 @app.route("/img/<name>", methods=["GET"])
@@ -228,12 +306,6 @@ def js(name):
 @app.route("/css/<name>", methods=["GET"])
 def css(name):
 	return send_from_directory("css", name)
-
-# 투표 참여 동적 라우팅
-@app.route("/join/<code>")
-@jwt_required
-def join(code):
-	return "<h1>Hello, %s!</h1>" % code
 
 if __name__ == "__main__":
     # 데이터베이스 인스턴스 생성
