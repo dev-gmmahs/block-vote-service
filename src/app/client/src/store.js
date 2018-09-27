@@ -8,7 +8,9 @@ export default new Vuex.Store({
     token: '',
     noticeMessage: '',
     noticeOpened: false,
-    voteCode: ''
+    voteCode: '',
+    voteData: {},
+    voting: false
   },
   mutations: {
     SET_TOKEN (state, token) {
@@ -19,6 +21,12 @@ export default new Vuex.Store({
     },
     SET_VOTE_CODE (state, code) {
       state.voteCode = code
+    },
+    SET_VOTE_DATA (state, data) {
+      state.voteData = data
+    },
+    SET_VOTING_STATUS (state, status) {
+      state.voting = status
     },
     END_VOTE (state) {
       state.voteCode = ''

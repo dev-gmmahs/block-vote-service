@@ -271,7 +271,7 @@ export default {
   padding: 10px;
   border-radius: 5px;
   background-color: #eee;
-  height: 150px;
+  height: 200px;
   overflow-y: auto;
   text-align: left;
   font-size: 0.8rem;
