@@ -64,16 +64,53 @@ export default {
       }
     },
     join () {
-      this.$http.get('/join/' + this.joinCode, {}, {
-        headers: { Authorization: 'Bearer ' + this.$store.state.token }
+      if (!this.joinCode) {
+        alert('코드를 정확하게 입력해주세요')
+        return
+      }
+      const auth = 'Bearer '.concat(this.$store.state.token)
+      this.$http.get('/join/' + this.joinCode, {
+        headers: { Authorization: auth }
       }).then(result => {
-        if (result.data.info) {
+        /*
+        result.data.data : 서버로부터 받은 투표형식 데이터 (투표 명, 투표 항목 등)
+        데이터 형식 :
+
+        {
+          name: 'XX 찬/반 투표',
+          founder: '홍길동(test123)',
+          start: '2018-01-01 10:00:00',
+          end: '2018-01-02 12:00:00',
+          items: [
+            '후보1',
+            '후보2',
+            '후보3'
+          ]
+        }
+
+        */
+        console.log(result.data)
+        if (result.data.permission) {
+          this.$store.commit('SET_VOTE_CODE', this.joinCode)
+          this.$store.commit('SET_VOTE_DATA', result.data.data)
           this.$router.push({ path: '/vote' })
         } else {
           alert('참여 실패')
         }
       }).catch(e => {
         alert(e)
+        this.$store.commit('SET_VOTE_CODE', 't1e2s3t4')
+        this.$store.commit('SET_VOTE_DATA', {
+          name: 'XX 찬/반 투표',
+          founder: '홍길동(test123)',
+          start: '2018-01-01 10:00:00',
+          end: '2018-01-02 12:00:00',
+          items: [
+            '후보1',
+            '후보2',
+            '후보3'
+          ]
+        })
         this.$router.push({ path: '/vote' })
       })
     }
