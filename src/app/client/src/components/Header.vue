@@ -1,6 +1,6 @@
 <template>
   <div id="nav">
-    <router-link to="/" id="join-link" v-if="path !== 'home'">홈</router-link>
+    <router-link to="/" id="join-link" v-if="path !== 'home' && !$store.state.voting">홈</router-link>
     <router-link to="/login" id="login-link" v-if="path === 'home' && !isLogined">로그인</router-link>
     <router-link to="/join" id="home-link" v-if="path === 'home' && !isLogined">회원가입</router-link>
     <a id="logout-link" v-if="path === 'home' && isLogined" @click="logout">로그아웃</a>
