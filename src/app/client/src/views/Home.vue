@@ -73,11 +73,19 @@ export default {
         headers: { Authorization: auth }
       }).then(result => {
         /*
+<<<<<<< HEAD
         result.data.data : 서버로부터 받은 투표형식 데이터 (투표 명, 투표 항목 등)
         데이터 형식 :
 
         {
           name: 'XX 찬/반 투표',
+=======
+        result : 서버로부터 받은 투표형식 데이터 (투표 명, 투표 항목 등)
+        데이터 형식 :
+
+        {
+          name: 'XX 찬/반 투표'
+>>>>>>> master
           founder: '홍길동(test123)',
           start: '2018-01-01 10:00:00',
           end: '2018-01-02 12:00:00',
@@ -92,7 +100,10 @@ export default {
         console.log(result.data)
         if (result.data.permission) {
           this.$store.commit('SET_VOTE_CODE', this.joinCode)
+<<<<<<< HEAD
           this.$store.commit('SET_VOTE_DATA', result.data.data)
+=======
+>>>>>>> master
           this.$router.push({ path: '/vote' })
         } else {
           alert('참여 실패')
@@ -100,6 +111,7 @@ export default {
       }).catch(e => {
         alert(e)
         this.$store.commit('SET_VOTE_CODE', 't1e2s3t4')
+<<<<<<< HEAD
         this.$store.commit('SET_VOTE_DATA', {
           name: 'XX 찬/반 투표',
           founder: '홍길동(test123)',
@@ -111,6 +123,8 @@ export default {
             '후보3'
           ]
         })
+=======
+>>>>>>> master
         this.$router.push({ path: '/vote' })
       })
     }

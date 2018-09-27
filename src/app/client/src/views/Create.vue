@@ -1,7 +1,7 @@
 <template>
   <div id="create">
     <div class="gradient-header"></div>
-    <div class="panel create-panel">
+    <div class="panel create-panel" id="create-panel">
       <h2>새 투표 생성</h2>
       <transition name="fade" mode="out-in">
         <div v-if="view === 0" :key="1">
@@ -34,48 +34,59 @@
         </div>
         <div v-else-if="view === 1" :key="2">
           <h3>투표 옵션 및 항목 작성</h3>
-          <form @submit.prevent="submit">
-            <div class="option-area">
-              <b class="option-title">참여 인원</b>
-              <br><br>
-              <label>제한없음</label>
-              <input type="radio" name="limit" v-model.number="limit" value="0">
-              &nbsp;
-              <label>직접 지정</label>
-              <input type="radio" name="limit" v-model.number="limit" value="1">
+          <div class="option-area">
+            <b class="option-title">참여 인원</b>
+            <br><br>
+            <label>제한없음</label>
+            <input type="radio" name="limit" v-model.number="limit" value="0">
+            &nbsp;
+            <label>직접 지정</label>
+            <input type="radio" name="limit" v-model.number="limit" value="1">
+          </div>
+          <transition name="fade" mode="out-in">
+            <div class="input-area" v-if="limit === 1">
+              <input type="number" min="5" v-model.number="limitCount">
             </div>
-            <transition name="fade" mode="out-in">
-              <div class="input-area" v-if="limit === 1">
-                <input type="number" min="5" v-model.number="limitCount">
+          </transition>
+          <hr>
+          <div class="option-area">
+            <b class="option-title">참여자</b>
+            <br><br>
+            <label>누구나</label>
+            <input type="radio" name="target" v-model.number="voteTarget" value="0">
+            &nbsp;
+            <label>직접 지정</label>
+            <input type="radio" name="target" v-model.number="voteTarget" value="1">
+          </div>
+          <transition name="fade" mode="out-in">
+            <div class="vote-target-area" id="target-area" v-if="voteTarget === 1">
+              <item v-for="target in targetList" :key="target" :id="target" @close="removeTarget"/>
+              <div class="already-area">
+                <transition name="fade" mode="out-in">
+                  <b v-if="alreadyInList">이미 존재하는 아이디입니다.</b>
+                </transition>
               </div>
-            </transition>
-            <hr>
-            <div class="option-area">
-              <b class="option-title">참여자</b>
-              <br><br>
-              <label>누구나</label>
-              <input type="radio" name="target" v-model.number="voteTarget" value="0">
-              &nbsp;
-              <label>직접 지정</label>
-              <input type="radio" name="target" v-model.number="voteTarget" value="1">
+              <div class="input-area">
+                <input v-model.trim="targetTemp" placeholder="참여자 ID" @keydown="targetKeyDown" style="margin-bottom: 5px;">
+                <button type="button" @click="targetKeyDown('click')" class="add-btn">추가</button>
+              </div>
+              <b>{{ targetList.length }} / {{ limit === 1 ? limitCount + '명' : '제한없음' }}</b>
             </div>
-            <transition name="fade" mode="out-in">
-              <div class="vote-target-area" id="target-area" v-if="voteTarget === 1">
-                <item v-for="target in targetList" :key="target" :id="target" @close="removeTarget"/>
-                <div class="already-area">
-                  <transition name="fade" mode="out-in">
-                    <b v-if="alreadyInList">이미 존재하는 아이디입니다.</b>
-                  </transition>
-                </div>
-                <div class="input-area">
-                  <input v-model.trim="targetTemp" placeholder="참여자 ID" @keydown="targetKeyDown" style="margin-bottom: 5px;">
-                  <button type="button" @click="targetKeyDown('click')" class="add-btn">추가</button>
-                </div>
-                <b>{{ targetList.length }} / {{ limit === 1 ? limitCount + '명' : '제한없음' }}</b>
-              </div>
-            </transition>
-            <button :class="voteItemCheck ? 'able' : 'disable'">생성하기</button>
-          </form>
+          </transition>
+          <hr>
+          <div class="option-area">
+            <b class="option-title">투표 항목</b>
+            <br>
+            <br>
+            <div class="input-area" v-for="(item, i) in items" :key="i">
+              <input type="text" maxlength="15" :placeholder="'항목' + (i + 1)" v-model="items[i]">
+            </div>
+            <div class="input-area">
+              <button class="add-button" @click="addItem">항목 추가</button>
+              <button class="remove-button" @click="removeItem">항목 삭제</button>
+            </div>
+          </div>
+          <button :class="voteItemCheck ? 'able' : 'disable'" @click="submit">생성하기</button>
         </div>
         <div v-else-if="view === 2">
           <h3>{{ msg }}</h3>
@@ -109,10 +120,11 @@ export default {
   name: 'create',
   data () {
     return {
-      view: 0,
+      view: 1,
       hours: [],
       targetList: [],
-      items: [],
+      items: ['', ''],
+      itemCount: 2,
       voteName: '',
       voteIntro: '',
       startDate: '',
@@ -125,7 +137,8 @@ export default {
       limitCount: 5,
       alreadyInList: false,
       msg: '',
-      voteCode: ''
+      voteCode: '',
+      alreadySubmit: false
     }
   },
   components: {
@@ -236,6 +249,13 @@ export default {
         return false
       }
 
+      for (let i of this.items) {
+        if (i.length === 0) {
+          this.msg = '투표 항목은 비울 수 없습니다'
+          return false
+        }
+      }
+
       this.msg = ''
       return true
     },
@@ -266,9 +286,39 @@ export default {
       }
     },
     /**
+     * @description 새 투표 항목 추가
+     */
+    addItem () {
+      this.msg = ''
+      if (this.items.length === 10) {
+        this.msg = '항목은 최대 10개 까지 생성 가능합니다!'
+      } else {
+        this.items.push('')
+      }
+      const area = document.getElementById('create-panel')
+      area.scrollTop = area.scrollHeight
+    },
+    /**
+     * @description 투표 항목 삭제
+     */
+    removeItem () {
+      this.msg = ''
+      if (this.items.length === 2) {
+        this.msg = '항목은 최소 2개 이상이어야합니다!'
+      } else {
+        this.items.pop()
+      }
+      const area = document.getElementById('create-panel')
+      area.scrollTop = area.scrollHeight
+    },
+    /**
      * @description 새 투표 생성 데이터 제출
      */
     submit () {
+      if (!this.voteItemCheck || this.alreadySubmit) {
+        return
+      }
+      this.alreadySubmit = true
       this.$http.post('/create/vote', {
         vote_name: this.voteName,
         vote_start: this.startDate,
@@ -292,6 +342,8 @@ export default {
       }).catch(e => {
         this.msg = e.message
         this.view = 2
+      }).finally(() => {
+        this.alreadySubmit = false
       })
     },
     /**
@@ -396,8 +448,30 @@ hr {
 .option-title {
   padding: 5px 10px;
   border-radius: 25px;
-  background-color: dodgerblue;
-  color: #fff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  color: #555;
   margin: 10px 0;
+}
+
+.add-button {
+  border: 2px solid #6abf69 !important;
+  color: #6abf69 !important;
+  margin-right: 5px;
+
+  &:hover {
+    background-color: #6abf69 !important;
+    color: #fff !important;
+  }
+}
+
+.remove-button {
+  border: 2px solid #ff6659 !important;
+  color: #ff6659 !important;
+  margin-left: 5px;
+
+  &:hover {
+    background-color: #ff6659 !important;
+    color: #fff !important;
+  }
 }
 </style>

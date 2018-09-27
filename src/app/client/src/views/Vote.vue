@@ -49,6 +49,7 @@ export default {
       verified: false,
       msg: '',
       view: 0,
+<<<<<<< HEAD
       selectItem: '',
       ask: false
     }
@@ -90,6 +91,20 @@ export default {
     },
     back () {
       console.log('back')
+=======
+      voteName: '',
+      voteFounder: '',
+      voteStart: null,
+      voteEnd: null,
+      voteItems: []
+    }
+  },
+  created () {
+    if (!this.$store.state.voteCode) {
+      alert('잘못된 접근')
+      this.$router.push({ path: '/' })
+      return
+>>>>>>> master
     }
   }
 }
