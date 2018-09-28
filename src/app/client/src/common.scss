@@ -1,0 +1,17 @@
+// $gradient-primary-color: #62f760;
+// $gradient-secondary-color: #3b74e5;
+// $gradient-default-color: #62f760;
+
+$gradient-primary-color: #08AEEA; // 그라데이션 색1
+$gradient-secondary-color: #2AF598; // 그라데이션 색2
+$gradient-default-color: #08AEEA; // 그라데이션 미지원 브라우저에 적용할 색상
+$gradient-degree: 0deg; // 그라데이션 각도
+
+// 그라데이션 배경 스타일
+@mixin gradient-background {
+    background: $gradient-default-color;
+    background: -moz-linear-gradient($gradient-degree, $gradient-primary-color 0%, $gradient-secondary-color 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient($gradient-degree, $gradient-primary-color 0%,$gradient-secondary-color 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient($gradient-degree, $gradient-primary-color 0%,$gradient-secondary-color 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='$gradient-primary-color', endColorstr='$gradient-secondary-color',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+}
