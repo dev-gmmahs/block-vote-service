@@ -5,33 +5,35 @@
         <h1>투표에 참여하세요!</h1>
         <div class="code-input-area">
           <input type="text" v-model.trim="joinCode" @keydown="keydown" placeholder="참여코드">
-          <button @click="join">V</button>
+          <button @click="join"><fa-icon icon="hand-point-left"/></button>
         </div>
       </div>
       <div class="bottom-area">
         <img src="@/assets/arrow.png">
       </div>
     </div>
-    <div class="content">
+    <div>
       <h2>정보</h2>
-      <div class="info-image">
-        <img src="@/assets/vote.png">
+    </div>
+    <div class="content">
+      <div class="info-image first">
+        <fa-icon icon="users"/>
         <br>
         <div>
           <p class="img-title">투표</p>
           누구나 참여할 수 있습니다
         </div>
       </div>
-      <div class="info-image">
-        <img src="@/assets/lock.png">
+      <div class="info-image second">
+        <fa-icon icon="user-shield"/>
         <br>
         <div>
           <p class="img-title">보안</p>
           안전하게 저장합니다
         </div>
       </div>
-      <div class="info-image">
-        <img src="@/assets/smile.png">
+      <div class="info-image third">
+        <fa-icon icon="smile-wink"/>
         <br>
         <div>
           <p class="img-title">편리</p>
@@ -39,8 +41,17 @@
         </div>
       </div>
     </div>
-    <div class="content darker">
-      <h2>투표 생성하기</h2>
+    <div class="content">
+      <div class="create-vote-info">
+        <h2>투표 생성하기</h2>
+        <hr>
+        <div v-if="this.$store.state.token.trim()">
+          생성!
+        </div>
+        <div v-else>
+          로그인 후 이용 가능합니다
+        </div>
+      </div>
     </div>
     <footer>
       <div>Copyright (c) 2018 GMMAHS Community</div>
@@ -119,6 +130,7 @@ export default {
 </script>
 
 <style lang="scss">
+@import "../common.scss";
 
 .img-title {
   font-size: 1.5rem;
@@ -132,38 +144,62 @@ export default {
   .content {
     padding: 20px;
 
-    &.darker {
-      background-color: #eee;
+    .create-vote-info {
+      width: 80%;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #ce99ff;
+      color: #fff;
+      margin: auto;
+      margin-top: 50px;
+      margin-bottom: 100px;
+
+      hr {
+        border-color: #fff;
+      }
     }
 
     .info-image {
       display: inline-block;
-      box-sizing: border-box;
-      width: 20%;
       padding: 20px;
+      border-radius: 12px;
+      width: 20%;
       margin: 15px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      border-radius: 10px;
 
-      img {
-        width: 50%;
+      &.first {
+        background-color: #ffa3a3;
+        box-shadow: 0px 0px 20px rgba(255, 163, 163, 0.75);
+      }
+
+      &.second {
+        background-color: #fff384;
+        box-shadow: 0px 0px 20px rgba(255, 243, 132, 0.75);
+      }
+
+      &.third {
+        background-color: #73f1cb;
+        box-shadow: 0px 0px 20px rgba(115, 241, 203, 0.75);
       }
 
       div {
         display: inline-block;
       }
+
+      svg {
+        font-size: 5rem;
+      }
     }
 
     @media screen and (max-width: 768px) {
       .info-image {
-        display: block;
-        width: 100%;
+        display: inline-block;
+        width: 82%;
         margin: 0;
         margin-bottom: 30px;
+      }
 
-        img {
-          width: 20%;
-        }
+      .create-vote-info {
+        width: 96%;
       }
     }
   }
@@ -175,14 +211,10 @@ export default {
   }
 
   .gradient-panel {
+    @include gradient-background;
     position: relative;
     width: 100%;
     height: 100%;
-    background: #62f760; /* Old browsers */
-    background: -moz-linear-gradient(-45deg, #62f760 0%, #3b74e5 100%); /* FF3.6-15 */
-    background: -webkit-linear-gradient(-45deg, #62f760 0%,#3b74e5 100%); /* Chrome10-25,Safari5.1-6 */
-    background: linear-gradient(135deg, #62f760 0%,#3b74e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#62f760', endColorstr='#3b74e5',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 
     .vote-code-area {
       position: absolute;
