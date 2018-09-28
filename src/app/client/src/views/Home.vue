@@ -142,6 +142,7 @@ export default {
   height: 100%;
 
   .content {
+    position: relative;
     padding: 20px;
 
     .create-vote-info {
@@ -165,6 +166,23 @@ export default {
       border-radius: 12px;
       width: 20%;
       margin: 15px;
+      transition: .4s;
+
+      &:hover {
+        transform: translateY(-10px);
+
+        &.first {
+          box-shadow: 0px 14px 20px rgba(255, 163, 163, 0.8);
+        }
+
+        &.second {
+          box-shadow: 0px 14px 20px rgba(255, 243, 132, 0.8);
+        }
+
+        &.third {
+          box-shadow: 0px 14px 20px rgba(115, 241, 203, 0.8);
+        }
+      }
 
       &.first {
         background-color: #ffa3a3;
