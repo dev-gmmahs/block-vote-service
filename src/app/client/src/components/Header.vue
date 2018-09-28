@@ -1,11 +1,11 @@
 <template>
   <div id="nav">
-    <router-link to="/" id="join-link" v-if="path !== 'home' && !$store.state.voting">홈</router-link>
-    <router-link to="/login" id="login-link" v-if="path === 'home' && !isLogined">로그인</router-link>
-    <router-link to="/join" id="home-link" v-if="path === 'home' && !isLogined">회원가입</router-link>
-    <a id="logout-link" v-if="path === 'home' && isLogined" @click="logout">로그아웃</a>
-    <router-link to="/mypage" id="info-link" v-if="path === 'home' && isLogined">내 정보</router-link>
-    <router-link to="/create" id="info-link" v-if="path === 'home' && isLogined">투표 생성</router-link>
+    <router-link to="/" id="join-link" v-if="path !== 'home' && !$store.state.voting">홈 <fa-icon icon="home"/></router-link>
+    <router-link to="/login" id="login-link" v-if="path === 'home' && !isLogined">로그인 <fa-icon icon="sign-in-alt"/></router-link>
+    <router-link to="/join" id="home-link" v-if="path === 'home' && !isLogined">회원가입 <fa-icon icon="user-plus"/></router-link>
+    <a id="logout-link" v-if="path === 'home' && isLogined" @click="logout">로그아웃 <fa-icon icon="sign-out-alt"/></a>
+    <router-link to="/mypage" id="info-link" v-if="path === 'home' && isLogined">내 정보 <fa-icon icon="user"/></router-link>
+    <router-link to="/create" id="info-link" v-if="path === 'home' && isLogined">투표 생성 <fa-icon icon="plus-circle"/></router-link>
   </div>
 </template>
 
@@ -23,7 +23,7 @@ export default {
      * @description 로그인 여부 확인
      */
     isLogined () {
-      return this.$store.state.token ? true : false
+      return this.$store.state.token
     }
   },
   methods: {
@@ -110,11 +110,12 @@ export default {
     cursor: pointer;
     text-decoration: none;
     color: #fff;
-    margin: 0 5px;
+    margin: 0 16px;
   }
 
   a:hover {
     color: #fff;
+    border-bottom: 1px solid #fff;
   }
 }
 </style>

@@ -126,7 +126,9 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
+@import "../common.scss";
+
 #vote {
   display: flex;
   align-items: center;
