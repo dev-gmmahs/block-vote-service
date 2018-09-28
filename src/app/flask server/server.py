@@ -17,6 +17,8 @@ jwt = JWTManager(app)
 
 db = None
 
+
+
 # 토큰 검증
 def accessCheck(sid, token):
     try:
@@ -28,9 +30,13 @@ def accessCheck(sid, token):
     except:
         return False
 
+
+
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
+
+
 
 # 투표 제출
 @app.route("/info/send/vote", methods=["POST"])
@@ -42,6 +48,8 @@ def vote():
         return jsonify({"success": False, "code": ""}), 200
     except:
         return jsonify({"success": False, "code": ""}), 500
+
+
 
 # 회원가입 라우팅
 @app.route("/info/login/regist", methods=["POST"])
@@ -85,6 +93,8 @@ def regist():
     except:
         return jsonify({"success": False, "already": False})
 
+
+
 # 로그인
 @app.route("/login", methods=["POST"])
 def login():
@@ -125,6 +135,8 @@ def login():
     except:
         return jsonify({"token": ""})
 
+
+
 @app.route("/logout", methods=["POST"])
 @jwt_required
 def logout():
@@ -136,6 +148,8 @@ def logout():
         return jsonify(True), 200
     except:
         return jsonify(False), 500
+
+
 
 # 토큰 엑세스 확인 라우팅
 @app.route("/access", methods=["POST"])
@@ -150,10 +164,14 @@ def access():
         # 클라이언트에게 성공 전달
         return jsonify(False), 401
 
+
+
 # 토큰 만료 핸들링
 @jwt.expired_token_loader
 def expired_token():
     return jsonify({"msg": "토큰 만료 됨"}), 401
+
+
 
 # 투표 생성 라우팅
 @app.route("/create/vote", methods=["POST"])
@@ -230,12 +248,14 @@ def create():
         return jsonify({"success": False, "code": ""}), 500
 
 
+
 # 투표 결과 라우팅
 @app.route("/info/vote/result", methods=["GET"])
 @jwt_required
 def result():
     result = accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1])
     return "<h1>Hello {}</h1>".format(str(result))
+
 
 
 # 투표 정보조회 라우팅
@@ -292,20 +312,28 @@ def vote_info(code):
         print(e)
         return jsonify({"permission": False, "overlimit": False, "data": {}}), 500
 
+
+
 # 이미지
 @app.route("/img/<name>", methods=["GET"])
 def img(name):
 	return send_from_directory("img", name)
+
+
 
 # JS
 @app.route("/js/<name>", methods=["GET"])
 def js(name):
 	return send_from_directory("js", name)
 
+
+
 # CSS
 @app.route("/css/<name>", methods=["GET"])
 def css(name):
 	return send_from_directory("css", name)
+
+
 
 if __name__ == "__main__":
     # 데이터베이스 인스턴스 생성
