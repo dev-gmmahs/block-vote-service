@@ -140,13 +140,13 @@ export default {
       display: inline-block;
       box-sizing: border-box;
       width: 20%;
-      padding: 2%;
+      padding: 20px;
       margin: 15px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
       border-radius: 10px;
 
       img {
-        width: 70%;
+        width: 50%;
       }
 
       div {
@@ -162,7 +162,7 @@ export default {
         margin-bottom: 30px;
 
         img {
-          width: 60%;
+          width: 20%;
         }
       }
     }

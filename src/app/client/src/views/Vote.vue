@@ -17,7 +17,8 @@
           <button @click="submit">{{ ask ? '예, 제출합니다' : '제출' }}</button>
         </div>
         <div v-if="view === 1">
-          투표 데이터를 검증하고있습니다. 잠시만 기다려주세요
+          잠시만 기다려주세요
+          <!-- 애니메이션 추가(또는 로딩 이미지) -->
         </div>
         <div v-if="view === 2">
           투표에 정상적으로 참여되었습니다. 참여해주셔서 감사합니다.
@@ -30,9 +31,6 @@
         <transition name="fade" mode="out-in">
           <b v-if="msg" :style="ask ? 'color: green' : ''">{{ msg }}</b>
         </transition>
-      </div>
-      <div class="message-area">
-        <a v-if="view > 1" @click="back">뒤로</a>
       </div>
       <router-link to="/" v-if="view !== 1">홈으로 이동</router-link>
     </div>
@@ -83,13 +81,46 @@ export default {
       }
     },
     proof () {
-      const selected = this.selectItem
-      const currentTime = new Date()
-      let nonce = 0
-      console.log(sha256(nonce))
-    },
-    back () {
-      console.log('back')
+      setTimeout(() => {
+        let data = {
+          vote: btoa(encodeURIComponent(this.selectItem)), // Base64 인코딩
+          currentTime: new Date()
+        }
+
+        console.log(decodeURIComponent(atob(data.vote))) // 디코딩 및 출력 (테스트)
+
+        // 난스
+        let nonce = 0
+
+        // 해시
+        let hash = ''
+
+        // 해시의 맨 앞 3자리가 000인 해시데이터 찾기 (nonce를 변경해가며 찾음)
+        while ((hash = sha256(data['vote'] +
+                             data['currentTime'] +
+                             nonce)).substring(0, 3) !== '000') {
+          nonce++ // 만약 해시값 앞이 000이 아니면 난스 1증가하여 다시 반복
+        }
+
+        // 제출 데이터에 해시값, 난스 추가
+        data['hash'] = hash
+        data['nonce'] = nonce
+
+        // 서버로 데이터 전송
+        this.$http.post('/info/send/vote', data, {
+          headers: { Authorization: 'Bearer ' + this.$store.state.token }
+        }).then(result => {
+          console.log(result)
+          setTimeout(() => {
+            this.view = 2
+          }, 750)
+        }).catch(e => {
+          console.log(e)
+          setTimeout(() => {
+            this.view = 3
+          }, 750)
+        })
+      }, 500)
     }
   }
 }
