@@ -79,6 +79,12 @@ export default {
         alert('코드를 정확하게 입력해주세요')
         return
       }
+
+      if (!this.$store.state.token) {
+        alert('로그인 후 사용가능한 서비스입니다')
+        return
+      }
+
       const auth = 'Bearer '.concat(this.$store.state.token)
       this.$http.get('/join/' + this.joinCode, {
         headers: { Authorization: auth }
@@ -92,6 +98,7 @@ export default {
           founder: '홍길동(test123)',
           start: '2018-01-01 10:00:00',
           end: '2018-01-02 12:00:00',
+          vote_code: 'test',
           items: [
             '후보1',
             '후보2',

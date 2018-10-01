@@ -5,6 +5,8 @@ import datetime
 import hashlib
 import random
 import string
+import base64
+import urllib.parse
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -42,12 +44,56 @@ def index():
 @app.route("/info/send/vote", methods=["POST"])
 @jwt_required
 def vote():
-    try:
-        if not accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1]):
-            return jsonify({"success": False, "code": ""}), 401
-        return jsonify({"success": False, "code": ""}), 200
-    except:
-        return jsonify({"success": False, "code": ""}), 500
+    #try:
+    req = request.get_json()
+    sid = get_jwt_identity()
+
+    if not accessCheck(sid, request.headers["Authorization"].split()[1]):
+        return jsonify({"success": False, "code": ""}), 401
+
+    vote_undecode = req["vote"].encode('utf-8')
+    vote = urllib.parse.unquote(base64.b64decode(req["vote"]).decode())
+    currentTime = req["currentTime"]
+    voteCode = req["voteCode"]
+    nonce = req["nonce"]
+
+    print(vote, currentTime, nonce)
+
+    checkHash = hashlib.sha256((str(vote_undecode) +
+                    str(currentTime) +
+                    str(voteCode) +
+                    str(nonce)).encode('utf-8')).hexdigest()
+
+    print(checkHash)
+    print(req["hash"])
+    print(req["hash"] == checkHash)
+
+    if checkHash != req["hash"]:
+        return jsonify({"success": False, "code": ""}), 403
+
+    alreadyCheck = db.execute("""
+    SELECT COUNT(*) AS COUNT FROM Vote_User WHERE UserIDSeq = %s AND
+    VoteIDSeq = %s AND JoinAlready = 0
+    """, (sid, voteCode))
+
+    # 투표 참여했는지 확인
+    if alreadyCheck[0]["COUNT"] != 0:
+        return jsonify({"success": False, "code": ""}), 403
+
+    vote_item = db.execute("""
+    SELECT Vote_Item FROM Vote_Item WHERE UniqueNumberSeq = %s
+    """, (voteCode))
+
+    # 투표한 항목이 투표에 존재하는지 확인
+    if vote in vote_item.split(","):
+        pass
+    else:
+        return jsonify({"success": False, "code": ""}), 404
+    
+    return jsonify({"success": False, "code": ""}), 200
+    # except Exception as e:
+    #     print(e)
+    #     return jsonify({"success": False, "code": ""}), 500
 
 
 
@@ -269,7 +315,7 @@ def vote_info(code):
             return jsonify({"permission": False, "overlimit": False, "data": {}}), 401
 
         vote_data = db.execute("""
-        SELECT UniqueNumberSeq, VoteName, u.UserID, u.UserName, VoteStart, VoteEnd, VotePermission, VoteLimit, VoteCreated 
+        SELECT UniqueNumberSeq, VoteName, u.UserID AS UserID, u.UserName AS UserName, VoteStart, VoteEnd, VotePermission, VoteLimit, VoteCreated 
         FROM Vote_Information i, UserTable u WHERE Vote_JoinCode = %s
         """, (code))
 
@@ -307,7 +353,24 @@ def vote_info(code):
             if total[0]["VoteLimit"] <= participated[0]["COUNT"]:
                 return jsonify({"permission": True, "overlimit": True, "data": {}}), 200
 
-        return jsonify({"permission": True, "overlimit": False, "data": vote_data[0]}), 200
+        item_data = db.execute("""
+        SELECT Vote_Item FROM Vote_Item WHERE UniqueNumberSeq = %s
+        """, (vote_data[0]["UniqueNumberSeq"]))[0]
+
+        items = item_data["Vote_Item"].split(",")
+
+        res_data = {
+            "name": vote_data[0]["UserName"],
+            "founder": "{}({})".format(vote_data[0]["UserName"], vote_data[0]["UserID"]),
+            "start": vote_data[0]["VoteStart"],
+            "end": vote_data[0]["VoteEnd"],
+            "vote_code": vote_data[0]["UniqueNumberSeq"],
+            "items": items
+        }
+
+        print(res_data)
+
+        return jsonify({"permission": True, "overlimit": False, "data": res_data}), 200
     except Exception as e:
         print(e)
         return jsonify({"permission": False, "overlimit": False, "data": {}}), 500

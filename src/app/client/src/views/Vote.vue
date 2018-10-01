@@ -18,12 +18,31 @@
         </div>
         <div v-if="view === 1">
           잠시만 기다려주세요
-          <!-- 애니메이션 추가(또는 로딩 이미지) -->
+          <div id="cube-area">
+            <div class="table-row">
+              <div class="cube cube-1"></div>
+              <div class="cube cube-2"></div>
+              <div class="cube cube-3"></div>
+            </div>
+            <div class="table-row">
+              <div class="cube cube-4"></div>
+              <div class="cube cube-5"></div>
+              <div class="cube cube-6"></div>
+            </div>
+            <div class="table-row">
+              <div class="cube cube-7"></div>
+              <div class="cube cube-8"></div>
+              <div class="cube cube-9"></div>
+            </div>
+          </div>
         </div>
         <div v-if="view === 2">
           투표에 정상적으로 참여되었습니다. 참여해주셔서 감사합니다.
         </div>
         <div v-if="view === 3">
+          <h1 class="failed">
+            <fa-icon icon="frown-open"/>
+          </h1>
           투표 참여 중 문제가 발생했습니다. 다시 참여해주세요
         </div>
       </transition>
@@ -84,7 +103,8 @@ export default {
       setTimeout(() => {
         let data = {
           vote: btoa(encodeURIComponent(this.selectItem)), // Base64 인코딩
-          currentTime: new Date()
+          currentTime: new Date(),
+          voteCode: this.$store.state.voteData.vote_code
         }
 
         console.log(decodeURIComponent(atob(data.vote))) // 디코딩 및 출력 (테스트)
@@ -97,8 +117,9 @@ export default {
 
         // 해시의 맨 앞 3자리가 000인 해시데이터 찾기 (nonce를 변경해가며 찾음)
         while ((hash = sha256(data['vote'] +
-                             data['currentTime'] +
-                             nonce)).substring(0, 3) !== '000') {
+                              data['currentTime'] +
+                              data['voteCode'] +
+                              nonce)).substring(0, 3) !== '000') {
           nonce++ // 만약 해시값 앞이 000이 아니면 난스 1증가하여 다시 반복
         }
 
@@ -178,5 +199,75 @@ export default {
 .vote-time {
   font-size: 0.8rem;
   color: #aaa;
+}
+
+#cube-area {
+  display: table;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.cube {
+  display: table-cell;
+  width: 30px;
+  height: 30px;
+  background-color: lightgray;
+  opacity: 0.0;
+}
+
+.table-row {
+  display: table-row;
+}
+
+.cube-1 {
+  animation: loading 1s .2s alternate infinite;
+}
+
+.cube-2 {
+  animation: loading 1s .3s alternate infinite;
+}
+
+.cube-3 {
+  animation: loading 1s .4s alternate infinite;
+}
+
+.cube-4 {
+  animation: loading 1s .1s alternate infinite;
+}
+
+.cube-5 {
+  animation: loading 1s .2s alternate infinite;
+}
+
+.cube-6 {
+  animation: loading 1s .3s alternate infinite;
+}
+
+.cube-7 {
+  animation: loading 1s alternate infinite;
+}
+
+.cube-8 {
+  animation: loading 1s .1s alternate infinite;
+}
+
+.cube-9 {
+  animation: loading 1s .2s alternate infinite;
+}
+
+@keyframes loading {
+  from {
+    transform: scale(0);
+    opacity: 0.0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.failed {
+  color: tomato;
 }
 </style>
