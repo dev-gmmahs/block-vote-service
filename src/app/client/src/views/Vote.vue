@@ -101,12 +101,22 @@ export default {
     },
     proof () {
       setTimeout(() => {
+        const date = new Date()
+        const year = date.getFullYear()
+        const month = date.getMonth() + 1
+        const day = date.getDate()
+        const hour = date.getHours()
+        const min = date.getMinutes()
+        const sec = date.getSeconds()
+
         let data = {
           vote: btoa(encodeURIComponent(this.selectItem)), // Base64 인코딩
-          currentTime: new Date(),
+          currentTime: `${year}-${month}-${day} ${hour}:${min}:${sec}`,
           voteCode: this.$store.state.voteData.vote_code
         }
 
+        console.log(data.currentTime)
+        console.log(data.vote)
         console.log(decodeURIComponent(atob(data.vote))) // 디코딩 및 출력 (테스트)
 
         // 난스
@@ -115,11 +125,14 @@ export default {
         // 해시
         let hash = ''
 
+        let hashingData = data['vote'] +
+                          data['currentTime'] +
+                          data['voteCode']
+
+        console.log(hashingData)
+
         // 해시의 맨 앞 3자리가 000인 해시데이터 찾기 (nonce를 변경해가며 찾음)
-        while ((hash = sha256(data['vote'] +
-                              data['currentTime'] +
-                              data['voteCode'] +
-                              nonce)).substring(0, 3) !== '000') {
+        while ((hash = sha256(hashingData + nonce)).substring(0, 3) !== '000') {
           nonce++ // 만약 해시값 앞이 000이 아니면 난스 1증가하여 다시 반복
         }
 

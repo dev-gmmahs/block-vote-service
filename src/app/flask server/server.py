@@ -44,56 +44,97 @@ def index():
 @app.route("/info/send/vote", methods=["POST"])
 @jwt_required
 def vote():
-    #try:
-    req = request.get_json()
-    sid = get_jwt_identity()
+    try:
+        req = request.get_json()
+        sid = get_jwt_identity()
 
-    if not accessCheck(sid, request.headers["Authorization"].split()[1]):
-        return jsonify({"success": False, "code": ""}), 401
+        if not accessCheck(sid, request.headers["Authorization"].split()[1]):
+            return jsonify({"success": False, "code": ""}), 401
 
-    vote_undecode = req["vote"].encode('utf-8')
-    vote = urllib.parse.unquote(base64.b64decode(req["vote"]).decode())
-    currentTime = req["currentTime"]
-    voteCode = req["voteCode"]
-    nonce = req["nonce"]
+        vote_undecode = req["vote"]
+        vote = urllib.parse.unquote(base64.b64decode(req["vote"]).decode())
+        currentTime = req["currentTime"]
+        voteCode = req["voteCode"]
+        nonce = req["nonce"]
 
-    print(vote, currentTime, nonce)
+        vote_info = db.execute("""
+        SELECT VotePermission, VoteLimit FROM Vote_Information WHERE UniqueNumberSeq = %s
+        """, (voteCode))
 
-    checkHash = hashlib.sha256((str(vote_undecode) +
-                    str(currentTime) +
-                    str(voteCode) +
-                    str(nonce)).encode('utf-8')).hexdigest()
+        # 투표가 없는 경우
+        if len(vote_info) == 0:
+            return jsonify({"success": False, "code": ""}), 404
 
-    print(checkHash)
-    print(req["hash"])
-    print(req["hash"] == checkHash)
+        vote_limit = db.execute("""
+        SELECT COUNT(*) AS COUNT FROM Vote_User WHERE JoinAlready = 1 AND UniqueNumberSeq = %s
+        """, (voteCode))
 
-    if checkHash != req["hash"]:
-        return jsonify({"success": False, "code": ""}), 403
+        # 참여 가능 인원이 초과된 경우
+        if vote_info[0]["VoteLimit"] <= vote_limit[0]["COUNT"]:
+            return jsonify({"success": False, "code": ""}), 401
 
-    alreadyCheck = db.execute("""
-    SELECT COUNT(*) AS COUNT FROM Vote_User WHERE UserIDSeq = %s AND
-    VoteIDSeq = %s AND JoinAlready = 0
-    """, (sid, voteCode))
+        # 해당 유저가 투표에 참여했는지 확인
+        if vote_info[0]["VotePermission"] == 1:
+            user_list = db.execute("""
+            SELECT UserID FROM Vote_User WHERE UserID = %s AND
+            UniqueNumberSeq = %s
+            AND JoinAlready = 0
+            """, (sid, voteCode))
 
-    # 투표 참여했는지 확인
-    if alreadyCheck[0]["COUNT"] != 0:
-        return jsonify({"success": False, "code": ""}), 403
+            if len(user_list) == 0:
+                return jsonify({"success": False, "code": ""}), 401
+            else:
+                print("참여자 명단에 존재, 참여 가능")
+        else:
+            print("아무나 참여 가능")
+            db.update("""
+            INSERT INTO Vote_User VALUES ((SELECT UserID FROM UserTable WHERE UserIDSeq = %s), %s, 0)
+            """, (sid, voteCode))
 
-    vote_item = db.execute("""
-    SELECT Vote_Item FROM Vote_Item WHERE UniqueNumberSeq = %s
-    """, (voteCode))
+        hashingData = (str(vote_undecode) + str(currentTime) + str(voteCode) + str(nonce)).encode("utf-8")
+        checkHash = hashlib.sha256(hashingData).hexdigest()
 
-    # 투표한 항목이 투표에 존재하는지 확인
-    if vote in vote_item.split(","):
-        pass
-    else:
-        return jsonify({"success": False, "code": ""}), 404
-    
-    return jsonify({"success": False, "code": ""}), 200
-    # except Exception as e:
-    #     print(e)
-    #     return jsonify({"success": False, "code": ""}), 500
+        if checkHash != req["hash"]:
+            return jsonify({"success": False, "code": ""}), 403
+
+        alreadyCheck = db.execute("""
+        SELECT COUNT(*) AS COUNT FROM Vote_User WHERE UserIDSeq = %s AND
+        VoteIDSeq = %s AND JoinAlready = 0
+        """, (sid, voteCode))
+
+        # 투표 참여했는지 확인
+        if alreadyCheck[0]["COUNT"] != 0:
+            return jsonify({"success": False, "code": ""}), 403
+
+        vote_item = db.execute("""
+        SELECT Vote_Item FROM Vote_Item WHERE UniqueNumberSeq = %s
+        """, (voteCode))[0]["Vote_Item"]
+
+        # 투표한 항목이 투표에 존재하는지 확인
+        if vote in vote_item.split(","):
+            inserted = db.update("""
+            INSERT INTO Vote_Data 
+            (UniqueNumberSeq, UserIDSeq, Vote_JoinDate, Vote_Item, nonce, Hash, Prev_Hash) 
+            VALUES (%s, (SELECT UserID FROM UserTable WHERE UserIDSeq = %s), %s)
+            """, (voteCode, sid, currentTime, vote, nonce, req["hash"], "prev_hash"))
+
+            result = db.update("""
+            UPDATE Vote_User SET JoinAlready = 1 WHERE 
+            UserID = (SELECT UserID FROM UserTable WHERE UserIDSeq = %s) AND 
+            UniqueNumberSeq = %s
+            """, (sid, voteCode))
+
+            if result == 1 and inserted:
+                return jsonify({"success": True, "code": ""}), 200
+            else:
+                return jsonify({"success": False, "code": ""}), 404
+        else:
+            return jsonify({"success": False, "code": ""}), 404
+        
+        return jsonify({"success": False, "code": ""}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"success": False, "code": ""}), 500
 
 
 

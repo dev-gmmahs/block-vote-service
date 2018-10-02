@@ -5,7 +5,7 @@
     <router-link to="/join" id="home-link" v-if="path === 'home' && !isLogined">회원가입 <fa-icon icon="user-plus"/></router-link>
     <a id="logout-link" v-if="path === 'home' && isLogined" @click="logout">로그아웃 <fa-icon icon="sign-out-alt"/></a>
     <router-link to="/mypage" id="info-link" v-if="path === 'home' && isLogined">내 정보 <fa-icon icon="user"/></router-link>
-    <router-link to="/create" id="info-link" v-if="path === 'home' && isLogined">투표 생성 <fa-icon icon="plus-circle"/></router-link>
+    <router-link to="/create" id="create-link" v-if="path === 'home' && isLogined">투표 생성 <fa-icon icon="plus-circle"/></router-link>
   </div>
 </template>
 
@@ -37,6 +37,7 @@ export default {
       const home = document.getElementById('home-link')
       const logout = document.getElementById('logout-link')
       const info = document.getElementById('info-link')
+      const create = document.getElementById('create-link')
       if (this.fill) {
         nav.style['background-color'] = '#fff'
         nav.style['box-shadow'] = '0px 0px 10px rgba(0, 0, 0, 0.3)'
@@ -59,6 +60,10 @@ export default {
         try {
           info.style['color'] = '#aaa'
         } catch (e) { }
+
+        try {
+          create.style['color'] = '#aaa'
+        } catch (e) { }
       } else {
         nav.style['background-color'] = 'transparent'
         nav.style['box-shadow'] = 'none'
@@ -80,6 +85,10 @@ export default {
 
         try {
           info.style['color'] = '#fff'
+        } catch (e) { }
+
+        try {
+          create.style['color'] = '#fff'
         } catch (e) { }
       }
     },
