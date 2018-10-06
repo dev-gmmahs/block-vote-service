@@ -237,7 +237,6 @@ export default {
         name: this.name,
         resident: this.resident_1 + this.resident_2
       }).then(r => {
-        console.log(r)
         if (r.data.success) {
           this.msg = this.name + '님 환영합니다'
           this.view = 3

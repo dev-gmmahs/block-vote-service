@@ -250,4 +250,19 @@ html, body {
 .fade-enter, .fade-leave-to {
   opacity: 0;
 }
+
+.vertical-outer {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.vertical-inner {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.vertical-area {
+  margin-left: auto;
+}
 </style>

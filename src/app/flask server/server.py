@@ -1,3 +1,7 @@
+# flask
+# pymysql
+# flask_jwt_extended
+
 from flask import Flask, request, render_template, send_from_directory, jsonify
 from database import database_manager
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
@@ -6,11 +10,10 @@ import hashlib
 import random
 import string
 import base64
+import datetime
 import urllib.parse
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 
 md5 = hashlib.md5()
 md5.update("sample".encode())
@@ -18,7 +21,6 @@ app.config["JWT_SECRET_KEY"] = md5.hexdigest()
 jwt = JWTManager(app)
 
 db = None
-
 
 
 # 토큰 검증
@@ -33,13 +35,25 @@ def accessCheck(sid, token):
         return False
 
 
-
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
 
 
-
+"""
+응답코드
+0: 성공
+2: 인증 실패
+3: 해당 투표 없음
+4: 투표 참여 가능 인원 초과
+5: 참여자 명단에 없음
+40: 투표 해시 불일치
+50: 이미 참여한 유저
+60: 투표 참여 기간 종료
+97: 투표 데이터 추가 실패
+98: 투표 항목 없음
+99: 알 수 없는 오류
+"""
 # 투표 제출
 @app.route("/info/send/vote", methods=["POST"])
 @jwt_required
@@ -49,7 +63,7 @@ def vote():
         sid = get_jwt_identity()
 
         if not accessCheck(sid, request.headers["Authorization"].split()[1]):
-            return jsonify({"success": False, "code": ""}), 401
+            return jsonify({"success": False, "code": 2}), 401
 
         vote_undecode = req["vote"]
         vote = urllib.parse.unquote(base64.b64decode(req["vote"]).decode())
@@ -58,12 +72,17 @@ def vote():
         nonce = req["nonce"]
 
         vote_info = db.execute("""
-        SELECT VotePermission, VoteLimit FROM Vote_Information WHERE UniqueNumberSeq = %s
+        SELECT VotePermission, VoteLimit, VoteStart, VoteEnd FROM Vote_Information WHERE UniqueNumberSeq = %s
         """, (voteCode))
+
+        if (datetime.datetime.now() >= vote_info[0]["VoteEnd"]):
+            print("해당 투표 참여 기간이 끝났습니다")
+            return jsonify({"success": False, "code": 60}), 401
 
         # 투표가 없는 경우
         if len(vote_info) == 0:
-            return jsonify({"success": False, "code": ""}), 404
+            print("투표를 찾을 수 없습니다")
+            return jsonify({"success": False, "code": 3}), 404
 
         vote_limit = db.execute("""
         SELECT COUNT(*) AS COUNT FROM Vote_User WHERE JoinAlready = 1 AND UniqueNumberSeq = %s
@@ -71,40 +90,41 @@ def vote():
 
         # 참여 가능 인원이 초과된 경우
         if vote_info[0]["VoteLimit"] <= vote_limit[0]["COUNT"]:
-            return jsonify({"success": False, "code": ""}), 401
+            print("해당 투표는 참여가능 인원이 가득 찼습니다")
+            return jsonify({"success": False, "code": 4}), 401
 
-        # 해당 유저가 투표에 참여했는지 확인
+        alreadyCheck = db.execute("""
+        SELECT UserIDSeq FROM Vote_User WHERE UserIDSeq = %s AND
+        UniqueNumberSeq = %s AND JoinAlready = 1
+        """, (sid, voteCode))
+
+        # 투표 참여했는지 확인
+        if len(alreadyCheck) != 0:
+            print("User: {} 이미 참여한 유저입니다".format(sid))
+            return jsonify({"success": False, "code": 50}), 403
+
+        # 해당 유저가 투표에 참여했는지 확인/참여자 명단에 있는지 확인
         if vote_info[0]["VotePermission"] == 1:
             user_list = db.execute("""
-            SELECT UserID FROM Vote_User WHERE UserID = %s AND
-            UniqueNumberSeq = %s
-            AND JoinAlready = 0
+            SELECT UserIDSeq FROM Vote_User WHERE UserIDSeq = %s AND
+            UniqueNumberSeq = %s AND JoinAlready = 0
             """, (sid, voteCode))
 
             if len(user_list) == 0:
-                return jsonify({"success": False, "code": ""}), 401
-            else:
-                print("참여자 명단에 존재, 참여 가능")
+                print("User: {} 투표 참여자 명단에 존재하지 않습니다".format(sid))
+                return jsonify({"success": False, "code": 5}), 401
         else:
-            print("아무나 참여 가능")
             db.update("""
-            INSERT INTO Vote_User VALUES ((SELECT UserID FROM UserTable WHERE UserIDSeq = %s), %s, 0)
+            INSERT INTO Vote_User VALUES (%s, %s, 0)
             """, (sid, voteCode))
+            print("User: {} 투표 참여자로 기록 됨".format(sid))
 
         hashingData = (str(vote_undecode) + str(currentTime) + str(voteCode) + str(nonce)).encode("utf-8")
         checkHash = hashlib.sha256(hashingData).hexdigest()
 
         if checkHash != req["hash"]:
-            return jsonify({"success": False, "code": ""}), 403
-
-        alreadyCheck = db.execute("""
-        SELECT COUNT(*) AS COUNT FROM Vote_User WHERE UserIDSeq = %s AND
-        VoteIDSeq = %s AND JoinAlready = 0
-        """, (sid, voteCode))
-
-        # 투표 참여했는지 확인
-        if alreadyCheck[0]["COUNT"] != 0:
-            return jsonify({"success": False, "code": ""}), 403
+            print("투표 데이터 해시가 일치하지 않습니다")
+            return jsonify({"success": False, "code": 40}), 403
 
         vote_item = db.execute("""
         SELECT Vote_Item FROM Vote_Item WHERE UniqueNumberSeq = %s
@@ -115,27 +135,35 @@ def vote():
             inserted = db.update("""
             INSERT INTO Vote_Data 
             (UniqueNumberSeq, UserIDSeq, Vote_JoinDate, Vote_Item, nonce, Hash, Prev_Hash) 
-            VALUES (%s, (SELECT UserID FROM UserTable WHERE UserIDSeq = %s), %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (voteCode, sid, currentTime, vote, nonce, req["hash"], "prev_hash"))
+            print("User: {} 투표 데이터 추가".format(sid))
+
+            if inserted == 0:
+                print("User: {} 투표 데이터 추가 실패".format(sid))
+                db.update("""
+                DELETE FROM Vote_User WHERE UserIDSeq = %s 
+                AND UniqueNumberSeq = %s
+                """, (sid, voteCode))
+                return jsonify({"success": False, "code": 97}), 500
 
             result = db.update("""
             UPDATE Vote_User SET JoinAlready = 1 WHERE 
-            UserID = (SELECT UserID FROM UserTable WHERE UserIDSeq = %s) AND 
-            UniqueNumberSeq = %s
+            UserIDSeq = %s AND UniqueNumberSeq = %s
             """, (sid, voteCode))
+            print("User: {} 투표 참여 완료 설정".format(sid))
 
-            if result == 1 and inserted:
-                return jsonify({"success": True, "code": ""}), 200
+            if result and inserted:
+                print("User: {} 참여 완료".format(sid))
+                return jsonify({"success": True, "code": 0}), 200
             else:
-                return jsonify({"success": False, "code": ""}), 404
+                print("User: {} 참여 실패".format(sid))
+                return jsonify({"success": False, "code": 99}), 404
         else:
-            return jsonify({"success": False, "code": ""}), 404
-        
-        return jsonify({"success": False, "code": ""}), 200
+            return jsonify({"success": False, "code": 98}), 404
     except Exception as e:
         print(e)
-        return jsonify({"success": False, "code": ""}), 500
-
+        return jsonify({"success": False, "code": 99}), 500
 
 
 # 회원가입 라우팅
@@ -181,7 +209,6 @@ def regist():
         return jsonify({"success": False, "already": False})
 
 
-
 # 로그인
 @app.route("/login", methods=["POST"])
 def login():
@@ -202,9 +229,9 @@ def login():
 
         if len(result) == 0:
             print("Unknown user")
-            return jsonify({"msg": "Unknown user"}), 400
+            return jsonify({"msg": "아이디와 비밀번호를 확인해주세요"}), 404
         elif len(result) > 1:
-            return jsonify({"msg": "User data error"}), 500
+            return jsonify({"msg": "유저 데이터 에러, 관리자에게 문의하세요"}), 500
 
         db.update("DELETE FROM UserLogin WHERE UserIDSeq = %s", (result[0]["UserIDSeq"]))
 
@@ -218,10 +245,9 @@ def login():
         db.update("INSERT INTO UserLogin VALUES (%s, %s, %s)", (result[0]["UserIDSeq"], access_token, current_time))
 
         print(current_time, "User logged in:", access_token)
-        return jsonify({"token": access_token})
+        return jsonify({"token": access_token}), 200
     except:
-        return jsonify({"token": ""})
-
+        return jsonify({"msg": "알 수 없는 오류", "token": ""}), 500
 
 
 @app.route("/logout", methods=["POST"])
@@ -235,7 +261,6 @@ def logout():
         return jsonify(True), 200
     except:
         return jsonify(False), 500
-
 
 
 # 토큰 엑세스 확인 라우팅
@@ -252,21 +277,26 @@ def access():
         return jsonify(False), 401
 
 
-
 # 토큰 만료 핸들링
 @jwt.expired_token_loader
 def expired_token():
     return jsonify({"msg": "토큰 만료 됨"}), 401
 
 
-
+"""
+응답코드
+0: 성공
+2: 인증 실패
+70: 투표 정보 추가 실패
+99: 알 수 없는 오류
+"""
 # 투표 생성 라우팅
 @app.route("/create/vote", methods=["POST"])
 @jwt_required
 def create():
     try:
         if not accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1]):
-            return jsonify({"success": False, "code": ""}), 401
+            return jsonify({"code": 2}), 401
 
         req = request.get_json()
         
@@ -326,14 +356,13 @@ def create():
 
         # 투표 정보 추가 또는 투표 항목 추가를 실패한 경우
         if affected == 0 or affected_item == 0:
-            return jsonify({"success": False, "code": ""}), 500
+            return jsonify({"code": 70}), 500
 
         # 정상적으로 처리 됨
-        return jsonify({"success": True, "code": vote_code}), 200
+        return jsonify({"code": 0, "vote_code": vote_code}), 200
     except Exception as e:
         print(e)
-        return jsonify({"success": False, "code": ""}), 500
-
+        return jsonify({"code": 99}), 500
 
 
 # 투표 결과 라우팅
@@ -344,7 +373,15 @@ def result():
     return "<h1>Hello {}</h1>".format(str(result))
 
 
-
+"""
+응답코드
+0: 성공
+2: 인증 실패
+3: 해당 투표 없음
+4: 참여 가능 인원 초과
+5: 참여 명단에 없음
+60: 투표 참여 기간 만료
+"""
 # 투표 정보조회 라우팅
 @app.route("/join/<code>", methods=["GET"])
 @jwt_required
@@ -353,16 +390,22 @@ def vote_info(code):
     try:
         sid = get_jwt_identity()
         if not accessCheck(sid, request.headers["Authorization"].split()[1]):
-            return jsonify({"permission": False, "overlimit": False, "data": {}}), 401
+            return jsonify({"code": 2, "data": {}}), 401
 
         vote_data = db.execute("""
         SELECT UniqueNumberSeq, VoteName, u.UserID AS UserID, u.UserName AS UserName, VoteStart, VoteEnd, VotePermission, VoteLimit, VoteCreated 
-        FROM Vote_Information i, UserTable u WHERE Vote_JoinCode = %s
+        FROM Vote_Information i, UserTable u WHERE Vote_JoinCode = %s AND u.UserIDSeq = i.UserID
         """, (code))
 
         # 만약 조회된 투표가 없을 경우
         if len(vote_data) == 0:
-            return jsonify({"permission": False, "overlimit": False, "data": {}}), 404
+            print("투표가 존재하지 않습니다")
+            return jsonify({"code": 3, "data": {}}), 404
+
+        if (datetime.datetime.now() >= vote_data[0]["VoteEnd"]):
+            print("해당 투표 참여 기간이 끝났습니다")
+            return jsonify({"code": 60, "data": {}}), 403
+        
 
         # 지정한 유저만 투표할 수 있는 경우 ID가 등록되어있는지 확인
         if vote_data[0]["VotePermission"] == 1:
@@ -373,7 +416,7 @@ def vote_info(code):
 
             # 참여자 명단에 ID가 없을 경우
             if check.pop()["COUNT"] is not 1:
-                return jsonify({"permission": False, "overlimit": False, "data": {}}), 401
+                return jsonify({"code": 5, "data": {}}), 401
         # 아무나 참여 가능한 투표인 경우
         else:
             pass
@@ -392,7 +435,7 @@ def vote_info(code):
 
             # 만약 현재 참여자 수가 전체 참여자수보다 크거나 같을 경우 더이상 참여 불가능
             if total[0]["VoteLimit"] <= participated[0]["COUNT"]:
-                return jsonify({"permission": True, "overlimit": True, "data": {}}), 200
+                return jsonify({"code": 4, "data": {}}), 200
 
         item_data = db.execute("""
         SELECT Vote_Item FROM Vote_Item WHERE UniqueNumberSeq = %s
@@ -401,7 +444,7 @@ def vote_info(code):
         items = item_data["Vote_Item"].split(",")
 
         res_data = {
-            "name": vote_data[0]["UserName"],
+            "name": vote_data[0]["VoteName"],
             "founder": "{}({})".format(vote_data[0]["UserName"], vote_data[0]["UserID"]),
             "start": vote_data[0]["VoteStart"],
             "end": vote_data[0]["VoteEnd"],
@@ -409,13 +452,10 @@ def vote_info(code):
             "items": items
         }
 
-        print(res_data)
-
-        return jsonify({"permission": True, "overlimit": False, "data": res_data}), 200
+        return jsonify({"code": 0, "data": res_data}), 200
     except Exception as e:
         print(e)
-        return jsonify({"permission": False, "overlimit": False, "data": {}}), 500
-
+        return jsonify({"code": 99, "data": {}}), 500
 
 
 # 이미지
@@ -424,19 +464,16 @@ def img(name):
 	return send_from_directory("img", name)
 
 
-
 # JS
 @app.route("/js/<name>", methods=["GET"])
 def js(name):
 	return send_from_directory("js", name)
 
 
-
 # CSS
 @app.route("/css/<name>", methods=["GET"])
 def css(name):
 	return send_from_directory("css", name)
-
 
 
 if __name__ == "__main__":

@@ -33,8 +33,8 @@ CREATE TABLE Vote_Data (
   Vote_JoinDate DATETIME NOT NULL,           -- 투표 참여시간
   Vote_Item VARCHAR(300) NOT NULL,           -- 투표 항목
   nonce INT NOT NULL,                        -- 난스
-  Hash VARCHAR(32) NOT NULL,                 -- 해시
-  Prev_Hash VARCHAR(32) NOT NULL,            -- 이전 해시
+  Hash VARCHAR(64) NOT NULL,                 -- 해시
+  Prev_Hash VARCHAR(64) NOT NULL,            -- 이전 해시
   PRIMARY KEY(UniqueDataSeq)
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE Vote_Item (
 );
 
 CREATE TABLE Vote_User (
-  UserID VARCHAR(10) NOT NULL,       -- 투표 참여자 아이디
+  UserIDSeq VARCHAR(20) NOT NULL,       -- 투표 참여자 고유 아이디
   UniqueNumberSeq VARCHAR(20) NOT NULL, -- 투표 고유번호
   JoinAlready INT NOT NULL              -- 투표 참여 여부
 );

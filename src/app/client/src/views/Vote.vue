@@ -2,56 +2,62 @@
   <div id="vote">
     <div class="gradient-header"></div>
     <div class="panel vote-panel">
-      <h2>{{ $store.state.voteData.name }}</h2>
-      <transition name="fade" mode="out-in">
-        <div class="input-area" v-if="view === 0">
-          <div class="vote-time">
-            <b>투표 진행 기간</b>
-            <br>
-            {{ $store.state.voteData.start }} ~ {{ $store.state.voteData.end }}
-          </div>
-          <div class="vote-select-item" v-for="item in $store.state.voteData.items" :key="item" @click="itemClick(item)">
-            {{ item }}
-            <img class="select-mark" src="@/assets/mark.png" v-if="selectItem === item">
-          </div>
-          <button @click="submit">{{ ask ? '예, 제출합니다' : '제출' }}</button>
-        </div>
-        <div v-if="view === 1">
-          잠시만 기다려주세요
-          <div id="cube-area">
-            <div class="table-row">
-              <div class="cube cube-1"></div>
-              <div class="cube cube-2"></div>
-              <div class="cube cube-3"></div>
+      <div class="vertical-outer">
+        <div class="vertical-inner">
+          <div class="vertical-area">
+            <h2>{{ $store.state.voteData.name }}</h2>
+            <transition name="fade" mode="out-in">
+              <div class="input-area" v-if="view === 0">
+                <div class="vote-time">
+                  <b>투표 진행 기간</b>
+                  <br>
+                  {{ $store.state.voteData.start }} ~ {{ $store.state.voteData.end }}
+                </div>
+                <div class="vote-select-item" v-for="item in $store.state.voteData.items" :key="item" @click="itemClick(item)">
+                  {{ item }}
+                  <img class="select-mark" src="@/assets/mark.png" v-if="selectItem === item">
+                </div>
+                <button @click="submit">{{ ask ? '예, 제출합니다' : '제출' }}</button>
+              </div>
+              <div v-if="view === 1">
+                잠시만 기다려주세요
+                <div id="cube-area">
+                  <div class="table-row">
+                    <div class="cube cube-1"></div>
+                    <div class="cube cube-2"></div>
+                    <div class="cube cube-3"></div>
+                  </div>
+                  <div class="table-row">
+                    <div class="cube cube-4"></div>
+                    <div class="cube cube-5"></div>
+                    <div class="cube cube-6"></div>
+                  </div>
+                  <div class="table-row">
+                    <div class="cube cube-7"></div>
+                    <div class="cube cube-8"></div>
+                    <div class="cube cube-9"></div>
+                  </div>
+                </div>
+              </div>
+              <div v-if="view === 2">
+                투표에 정상적으로 참여되었습니다. 참여해주셔서 감사합니다.
+              </div>
+              <div v-if="view === 3">
+                <h1 class="failed">
+                  <fa-icon icon="frown-open"/>
+                </h1>
+                투표 참여 중 문제가 발생했습니다. 다시 참여해주세요
+              </div>
+            </transition>
+            <div class="message-area">
+              <transition name="fade" mode="out-in">
+                <b v-if="msg" :style="ask ? 'color: green' : ''">{{ msg }}</b>
+              </transition>
             </div>
-            <div class="table-row">
-              <div class="cube cube-4"></div>
-              <div class="cube cube-5"></div>
-              <div class="cube cube-6"></div>
-            </div>
-            <div class="table-row">
-              <div class="cube cube-7"></div>
-              <div class="cube cube-8"></div>
-              <div class="cube cube-9"></div>
-            </div>
+            <router-link to="/" v-if="view !== 1">홈으로 이동</router-link>
           </div>
         </div>
-        <div v-if="view === 2">
-          투표에 정상적으로 참여되었습니다. 참여해주셔서 감사합니다.
-        </div>
-        <div v-if="view === 3">
-          <h1 class="failed">
-            <fa-icon icon="frown-open"/>
-          </h1>
-          투표 참여 중 문제가 발생했습니다. 다시 참여해주세요
-        </div>
-      </transition>
-      <div class="message-area">
-        <transition name="fade" mode="out-in">
-          <b v-if="msg" :style="ask ? 'color: green' : ''">{{ msg }}</b>
-        </transition>
       </div>
-      <router-link to="/" v-if="view !== 1">홈으로 이동</router-link>
     </div>
   </div>
 </template>
@@ -72,7 +78,7 @@ export default {
   },
   created () {
     if (!this.$store.state.voteCode || this.$store.state.voteData === {}) {
-      alert('잘못된 접근')
+      alert('잘못된 접근입니다')
       this.$router.push({ path: '/' })
     }
   },
@@ -115,9 +121,9 @@ export default {
           voteCode: this.$store.state.voteData.vote_code
         }
 
-        console.log(data.currentTime)
-        console.log(data.vote)
-        console.log(decodeURIComponent(atob(data.vote))) // 디코딩 및 출력 (테스트)
+        // console.log(data.currentTime)
+        // console.log(data.vote)
+        // console.log(decodeURIComponent(atob(data.vote))) // 디코딩 및 출력 (테스트)
 
         // 난스
         let nonce = 0
@@ -128,8 +134,6 @@ export default {
         let hashingData = data['vote'] +
                           data['currentTime'] +
                           data['voteCode']
-
-        console.log(hashingData)
 
         // 해시의 맨 앞 3자리가 000인 해시데이터 찾기 (nonce를 변경해가며 찾음)
         while ((hash = sha256(hashingData + nonce)).substring(0, 3) !== '000') {
@@ -144,14 +148,42 @@ export default {
         this.$http.post('/info/send/vote', data, {
           headers: { Authorization: 'Bearer ' + this.$store.state.token }
         }).then(result => {
-          console.log(result)
-          setTimeout(() => {
-            this.view = 2
-          }, 750)
+          if (result.data.code === 0) {
+            setTimeout(() => {
+              this.view = 2
+            }, 750)
+          } else {
+            setTimeout(() => {
+              this.view = 3
+            }, 750)
+          }
         }).catch(e => {
-          console.log(e)
+          const code = e.response.data.code
           setTimeout(() => {
             this.view = 3
+            if (code === 2) {
+              alert('사용자 인증에 실패하였습니다. 다시 로그인 해 주세요')
+              this.$store.commit('LOGOUT')
+              this.$router.push({ path: '/' })
+            } else if (code === 3) {
+              alert('투표를 찾을 수 없습니다')
+            } else if (code === 4) {
+              alert('투표 참여 가능 인원이 초과 되었습니다')
+            } else if (code === 5) {
+              alert('회원님은 참여자 명단에 존재하지 않습니다')
+            } else if (code === 40) {
+              alert('투표 해시가 일치하지 않습니다')
+            } else if (code === 50) {
+              alert('회원님은 본 투표에 이미 참여하셨습니다')
+            } else if (code === 60) {
+              alert('투표 참여 기간이 만료되었습니다')
+            } else if (code === 97) {
+              alert('투표 데이터 추가 실패')
+            } else if (code === 98) {
+              alert('투표 항목이 없습니다')
+            } else {
+              alert('알 수 없는 오류')
+            }
           }, 750)
         })
       }, 500)

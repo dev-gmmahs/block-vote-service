@@ -120,7 +120,7 @@ export default {
   name: 'create',
   data () {
     return {
-      view: 1,
+      view: 0,
       hours: [],
       targetList: [],
       items: ['', ''],
@@ -332,16 +332,34 @@ export default {
       }, {
         headers: { Authorization: 'Bearer ' + this.$store.state.token }
       }).then(result => {
-        if (result.data.success) {
-          this.voteCode = result.data.code
+        const code = result.data.code
+        if (code === 0) {
+          this.voteCode = result.data.vote_code
           this.view = 3
+        } else if (code === 2) {
+          this.msg = '사용자 인증에 실패했습니다. 다시 로그인 해 주세요'
+          this.$store.commit('LOGOUT')
+          this.$router.push({ path: '/home' })
+        } else if (code === 70) {
+          this.msg = '투표 정보 추가 실패'
+          this.view = 2
         } else {
-          this.msg = '투표를 생성하지 못했습니다.'
+          this.msg = '알 수 없는 오류'
           this.view = 2
         }
       }).catch(e => {
-        this.msg = e.message
+        const code = e.response.data.code
         this.view = 2
+        if (code === 2) {
+          this.msg = '사용자 인증에 실패했습니다. 다시 로그인 해 주세요'
+          alert('사용자 인증에 실패했습니다. 다시 로그인 해 주세요')
+          this.$store.commit('LOGOUT')
+          this.$router.push({ path: '/home' })
+        } else if (code === 70) {
+          this.msg = '투표 정보 추가 실패'
+        } else {
+          this.msg = '알 수 없는 오류'
+        }
       }).finally(() => {
         this.alreadySubmit = false
       })
