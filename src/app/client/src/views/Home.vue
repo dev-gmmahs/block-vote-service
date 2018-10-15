@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <div class="gradient-panel">
+      <img src="@/assets/vote.png" class="vote-image">
       <div class="vote-code-area">
         <h1>투표에 참여하세요!</h1>
         <div class="code-input-area">
@@ -107,29 +108,29 @@ export default {
         }
 
         */
-        if (result.data.code === 0) {
+        console.log(result.data)
+        if (result.data.permission) {
           this.$store.commit('SET_VOTE_CODE', this.joinCode)
           this.$store.commit('SET_VOTE_DATA', result.data.data)
           this.$router.push({ path: '/vote' })
         } else {
-          alert('투표에 참여하지 못했습니다')
+          alert('참여 실패')
         }
       }).catch(e => {
-        const code = e.response.data.code
-        if (code === 2) {
-          alert('사용자 인증에 실패하였습니다. 다시 로그인해주세요')
-          this.$store.commit('LOGOUT')
-        } else if (code === 3) {
-          alert('해당 코드의 투표가 없습니다')
-        } else if (code === 4) {
-          alert('해당 투표의 참여 가능 인원이 초과되었습니다')
-        } else if (code === 5) {
-          alert('회원님은 본 투표에 참여하실 수 없습니다')
-        } else if (code === 60) {
-          alert('투표 참여기간이 종료되었습니다')
-        } else {
-          alert('알 수 없는 오류가 발생하였습니다')
-        }
+        alert(e)
+        this.$store.commit('SET_VOTE_CODE', 't1e2s3t4')
+        this.$store.commit('SET_VOTE_DATA', {
+          name: 'XX 찬/반 투표',
+          founder: '홍길동(test123)',
+          start: '2018-01-01 10:00:00',
+          end: '2018-01-02 12:00:00',
+          items: [
+            '후보1',
+            '후보2',
+            '후보3'
+          ]
+        })
+        this.$router.push({ path: '/vote' })
       })
     }
   }
@@ -236,23 +237,43 @@ export default {
   }
 
   .gradient-panel {
-    @include gradient-background;
+    // @include gradient-background;
+    background-color: $main-color;
     position: relative;
     width: 100%;
     height: 100%;
+
+    .vote-image {
+      position: absolute;
+      width: 30%;
+      left: 35%;
+      top: 20%;
+      z-index: 0;
+    }
+
+    @media screen and (max-width: 768px) {
+      .vote-image {
+        top: 24%;
+        width: 70%;
+        left: 15%;
+      }
+    }
 
     .vote-code-area {
       position: absolute;
       top: 28%;
       left: 50%;
       box-sizing: border-box;
-      color: #fff;
-      width: 276px;
-      margin-left: -138px;
+      color: #333;
+      width: 320px;
+      margin-left: -160px;
 
       .code-input-area {
         position: relative;
         display: inline-block;
+        background-color: rgba(255, 255, 255, 0.5);
+        padding: 50px;
+        box-sizing: border-box;
 
         input {
           outline: none;
@@ -271,7 +292,7 @@ export default {
 
         button {
           position: absolute;
-          right: -8px;
+          right: 35px;
           cursor: pointer;
           outline: none;
           border: none;

@@ -372,6 +372,29 @@ def result():
     result = accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1])
     return "<h1>Hello {}</h1>".format(str(result))
 
+"""
+응답코드
+0: 성공
+51: 이미 존재하는 아이디
+99: 알 수 없는 아이디
+"""
+# 아이디 중복확인
+@app.route("/check/id", methods=["POST"])
+def check_id():
+    try:
+        req = request.get_json()
+        result = db.execute("""
+        SELECT COUNT(*) AS COUNT FROM UserTable WHERE UserID = %s
+        """, (req["id"]))
+
+        if result["COUNT"] == 0:
+            jsonify({"success": True, "code": 0}), 200
+        else:
+            jsonify({"success": False, "code": 51}), 409
+    except Exception as e:
+        print(e)
+        return jsonify({"success": False, "code": 99}), 500
+
 
 """
 응답코드

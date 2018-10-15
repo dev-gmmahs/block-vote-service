@@ -137,6 +137,9 @@
           <form @submit.prevent="submit">
             <div class="input-area">
               <input v-model="id" placeholder="아이디" maxlength="20" required>
+              <br>
+              <br>
+              <button @click="checkId">중복확인</button>
             </div>
             <div class="input-area">
               <input v-model="password_1" type="password" maxlength="18" placeholder="비밀번호" required>
@@ -179,6 +182,7 @@ export default {
       view: 0,
       agree: false,
       id: '',
+      idChecked: false,
       password_1: '',
       password_2: '',
       name: '',
@@ -222,6 +226,24 @@ export default {
 
       this.msg = ''
       return true
+    },
+    /**
+     * @description 아이디 중복 확인
+     */
+    checkId () {
+      this.$http.post('/check/id', {
+        id: this.id
+      }).then(r => {
+        this.idChecked = true
+      }).catch(e => {
+        this.idChecked = false
+        const code = e.response.data.code
+        if (code === 51) {
+          alert('이미 존재하는 아이디입니다')
+        } else {
+          alert('알 수 없는 오류 발생')
+        }
+      })
     },
     /**
      * @description 서버에 회원가입 요청
