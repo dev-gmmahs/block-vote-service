@@ -108,8 +108,7 @@ export default {
         }
 
         */
-        console.log(result.data)
-        if (result.data.permission) {
+        if (result.data.code === 0) {
           this.$store.commit('SET_VOTE_CODE', this.joinCode)
           this.$store.commit('SET_VOTE_DATA', result.data.data)
           this.$router.push({ path: '/vote' })
@@ -157,7 +156,6 @@ export default {
       width: 80%;
       padding: 20px;
       box-sizing: border-box;
-      background-color: #ce99ff;
       color: #fff;
       margin: auto;
       margin-top: 50px;

@@ -5,6 +5,7 @@ import Login from './views/Login.vue'
 import Join from './views/Join.vue'
 import Create from './views/Create.vue'
 import Vote from './views/Vote.vue'
+import Mypage from './views/Mypage.vue'
 
 Vue.use(Router)
 
@@ -36,6 +37,11 @@ export default new Router({
       path: '/vote',
       name: 'vote',
       component: Vote
+    },
+    {
+      path: '/mypage',
+      name: 'mypage',
+      component: Mypage
     }
   ]
 })

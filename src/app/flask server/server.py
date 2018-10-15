@@ -34,6 +34,12 @@ def accessCheck(sid, token):
     except:
         return False
 
+# length 길이의 임의의 랜덤문자 생성
+def randString(length):
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase +\
+    string.ascii_lowercase +\
+    string.digits) for _ in range(length))
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -172,11 +178,11 @@ def regist():
     try:
         req = request.get_json()
 
-        salt = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(16))
+        salt = randString(16)
 
         # 중복되지않는 SID 생성
         while True:
-            s_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
+            s_id = randString(20)
             r = db.execute("SELECT COUNT(*) AS COUNT FROM UserTable WHERE UserIDSeq = %s", (s_id))
             if r.pop()["COUNT"] == 0:
                 break
@@ -302,14 +308,14 @@ def create():
         
         # 중복되지않는 투표 고유 ID 생성
         while True:
-            vote_id = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(20))
+            vote_id = randString(20)
             count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE UniqueNumberSeq = %s", (vote_id))
             if count.pop()["COUNT"] == 0:
                 break
 
         # 중복되지않는 투표 참여 코드 생성
         while True:
-            vote_code = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+            vote_code = randString(10)
             count = db.execute("SELECT COUNT(*) AS COUNT FROM Vote_Information WHERE Vote_JoinCode = %s", (vote_code))
             if count.pop()["COUNT"] == 0:
                 break

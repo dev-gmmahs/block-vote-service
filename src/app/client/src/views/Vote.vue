@@ -7,7 +7,7 @@
           <div class="vertical-area">
             <h2>{{ $store.state.voteData.name }}</h2>
             <transition name="fade" mode="out-in">
-              <div class="input-area" v-if="view === 0">
+              <div class="input-area" v-if="view === 0" :key="1">
                 <div class="vote-time">
                   <b>투표 진행 기간</b>
                   <br>
@@ -19,7 +19,7 @@
                 </div>
                 <button @click="submit">{{ ask ? '예, 제출합니다' : '제출' }}</button>
               </div>
-              <div v-if="view === 1">
+              <div v-if="view === 1" :key="2">
                 잠시만 기다려주세요
                 <div id="cube-area">
                   <div class="table-row">
@@ -39,10 +39,10 @@
                   </div>
                 </div>
               </div>
-              <div v-if="view === 2">
+              <div v-if="view === 2" :key="3">
                 투표에 정상적으로 참여되었습니다. 참여해주셔서 감사합니다.
               </div>
-              <div v-if="view === 3">
+              <div v-if="view === 3" :key="4">
                 <h1 class="failed">
                   <fa-icon icon="frown-open"/>
                 </h1>
