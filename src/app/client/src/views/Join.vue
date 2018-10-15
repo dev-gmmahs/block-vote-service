@@ -136,7 +136,7 @@
         <div v-else-if="view === 1" :key="2">
           <form @submit.prevent="submit">
             <div class="input-area">
-              <input v-model="id" placeholder="아이디" maxlength="20" required>
+              <input v-model="id" @keydown="idChecked = false" placeholder="아이디" maxlength="20" required>
               <br>
               <br>
               <button @click="checkId">중복확인</button>
@@ -221,6 +221,11 @@ export default {
 
       if (!(this.resident_1.match(/^[0-9]{6}$/) && this.resident_2.match(/^[0-9]{7}$/))) {
         this.msg = '주민등록번호를 확실하게 입력해주세요'
+        return false
+      }
+
+      if (!this.idChecked) {
+        this.msg = '아이디 중복확인을 해주세요'
         return false
       }
 
