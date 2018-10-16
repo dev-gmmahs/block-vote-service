@@ -114,6 +114,7 @@ export default {
   padding: 20px 0;
   color: #eee;
   transition: .5s;
+  box-sizing: border-box;
 
   a {
     cursor: pointer;

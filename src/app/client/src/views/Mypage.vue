@@ -1,8 +1,23 @@
 <template>
   <div id="mypage">
     <transition name="fade" mode="out-in">
-      <div v-if="loaded">
-        Finish
+      <div class="mypage-area" v-if="loaded">
+        <div v-if="false">
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+          <div class="vote-item">A</div>
+        </div>
+        <div class="data-none">
+          <h2>투표 데이터가 없습니다</h2>
+        </div>
       </div>
       <div class="loading-page" v-else>
         <div id="cube-area-mypage">
@@ -36,7 +51,16 @@ export default {
     }
   },
   created () {
-
+    this.$http.get('/access', {
+      headers: { Authorization: 'Bearer ' + this.$store.state.token }
+    }).then(r => {
+      this.loaded = true
+    }).catch(e => {
+      console.log(e)
+      alert('접근할 수 없습니다. 다시 로그인해주세요')
+      this.$store.commit('LOGOUT')
+      this.$router.push({ path: '/' })
+    })
   }
 }
 </script>
@@ -44,14 +68,51 @@ export default {
 @import "../common.scss";
 
 #mypage {
+  width: 100%;
+  height: 100%;
+  background-color: $main-color;
+
   .loading-page {
     position: fixed;
     top: 0px;
     left: 0px;
     width: 100%;
     height: 100%;
-    background-color: $main-color;
     display: table;
+  }
+}
+
+.data-none {
+  color: #fff;
+  margin-top: 200px;
+}
+
+.mypage-area {
+  padding: 70px 0;
+  box-sizing: border-box;
+  background-color: $main-color;
+
+  .vote-item {
+    cursor: pointer;
+    border-radius: 15px;
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 40%;
+    height: 80px;
+    background-color: #fff;
+    padding: 10px;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .vote-item {
+      width: 80%;
+    }
   }
 }
 

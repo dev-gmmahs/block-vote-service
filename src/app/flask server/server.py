@@ -270,22 +270,24 @@ def logout():
 
 
 # 토큰 엑세스 확인 라우팅
-@app.route("/access", methods=["POST"])
+@app.route("/access", methods=["GET"])
 @jwt_required
 def access():
     try:
-        if accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1]):
+        sid = get_jwt_identity()
+        if accessCheck(sid, request.headers["Authorization"].split()[1]):
+            # 클라이언트에게 성공 전달
             return jsonify(True), 200
         else:
             return jsonify(False), 401
     except:
-        # 클라이언트에게 성공 전달
-        return jsonify(False), 401
+        return jsonify(False), 500
 
 
 # 토큰 만료 핸들링
 @jwt.expired_token_loader
 def expired_token():
+    print("토큰 만료 됨")
     return jsonify({"msg": "토큰 만료 됨"}), 401
 
 

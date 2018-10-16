@@ -3,7 +3,7 @@
     <div class="gradient-panel">
       <img src="@/assets/vote.png" class="vote-image">
       <div class="vote-code-area">
-        <h1>투표에 참여하세요!</h1>
+        <h1 class="vote-join-text">투표에 참여하세요!</h1>
         <div class="code-input-area">
           <input type="text" v-model.trim="joinCode" @keydown="keydown" placeholder="참여코드">
           <button @click="join"><fa-icon icon="hand-point-left"/></button>
@@ -116,20 +116,21 @@ export default {
           alert('참여 실패')
         }
       }).catch(e => {
-        alert(e)
-        this.$store.commit('SET_VOTE_CODE', 't1e2s3t4')
-        this.$store.commit('SET_VOTE_DATA', {
-          name: 'XX 찬/반 투표',
-          founder: '홍길동(test123)',
-          start: '2018-01-01 10:00:00',
-          end: '2018-01-02 12:00:00',
-          items: [
-            '후보1',
-            '후보2',
-            '후보3'
-          ]
-        })
-        this.$router.push({ path: '/vote' })
+        const code = e.response.data.code
+        if (code === 2) {
+          alert('사용자 인증에 실패하였습니다. 다시 로그인해주세요')
+          this.$store.commit('LOGOUT')
+        } else if (code === 3) {
+          alert('해당 코드의 투표가 없습니다.')
+        } else if (code === 4) {
+          alert('본 투표에 참여 가능한 인원이 초과되었습니다.')
+        } else if (code === 5) {
+          alert('회원님은 본 투표에 참여할 권한이 존재하지 않습니다.')
+        } else if (code === 60) {
+          alert('참여기간이 만료 되었습니다.')
+        } else {
+          alert('알 수 없는 오류가 발생하였습니다.')
+        }
       })
     }
   }
@@ -320,10 +321,18 @@ export default {
   }
 }
 
+.create-vote-info {
+  background-color:  plum;
+}
+
 @keyframes arrow {
   100% {
     bottom: 16px;
   }
+}
+
+.vote-join-text {
+  color: antiquewhite;
 }
 
 </style>
