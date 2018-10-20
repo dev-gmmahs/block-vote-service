@@ -49,8 +49,7 @@ export default {
           this.$router.push({ name: 'home' })
         }
       }).catch(e => {
-        console.dir(e)
-        this.msg = e.message
+        this.msg = e.response.data.msg
       })
     }
   }

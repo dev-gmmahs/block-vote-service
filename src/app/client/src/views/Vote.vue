@@ -264,11 +264,11 @@ export default {
   display: table-row;
 }
 
-.cube-1 {
+.cube-1, .cube-5, .cube-9 {
   animation: loading 1s .2s alternate infinite;
 }
 
-.cube-2 {
+.cube-2, .cube-6 {
   animation: loading 1s .3s alternate infinite;
 }
 
@@ -276,28 +276,12 @@ export default {
   animation: loading 1s .4s alternate infinite;
 }
 
-.cube-4 {
+.cube-4, .cube-8 {
   animation: loading 1s .1s alternate infinite;
-}
-
-.cube-5 {
-  animation: loading 1s .2s alternate infinite;
-}
-
-.cube-6 {
-  animation: loading 1s .3s alternate infinite;
 }
 
 .cube-7 {
   animation: loading 1s alternate infinite;
-}
-
-.cube-8 {
-  animation: loading 1s .1s alternate infinite;
-}
-
-.cube-9 {
-  animation: loading 1s .2s alternate infinite;
 }
 
 @keyframes loading {

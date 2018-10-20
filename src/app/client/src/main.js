@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 
 import axios from 'axios'
+import Chart from 'chart.js'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCoffee, faKey, faSignInAlt, faUserPlus, faHome, faUser, faPlusCircle, faHandPointLeft, faUserShield, faUsers, faSmileWink, faFrownOpen } from '@fortawesome/free-solid-svg-icons'
@@ -14,6 +15,7 @@ Vue.component('fa-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
+Vue.prototype.$chart = Chart
 
 new Vue({
   router,

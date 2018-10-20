@@ -8,6 +8,7 @@ USE Vote;
 -- DROP TABLE Vote_User;
 
 -- 20180923 수정 / 이근혁
+-- 20181020 수정 / 이근혁
 
 CREATE TABLE UserTable (
   UserIDSeq VARCHAR(20) NOT NULL, -- 유저 고유 ID
@@ -15,7 +16,7 @@ CREATE TABLE UserTable (
   Userpw VARCHAR(32) NOT NULL,    -- 유저 비밀번호 (암호화)
   Salt VARCHAR(16) NOT NULL,      -- 암호화 Salt
   UserName VARCHAR(10) NOT NULL,  -- 유저 이름
-  UserNumber VARCHAR(13) NOT NULL,-- 유저 주민등록번호
+  UserSex INT NOT NULL,           -- 유저 성별 (0: 남자, 1: 여자, 2: 기타)
   PRIMARY KEY(UserIDSeq)
 );
 

@@ -47,7 +47,7 @@
         <h2>투표 생성하기</h2>
         <hr>
         <div v-if="this.$store.state.token.trim()">
-          생성!
+          상단의 투표생성 메뉴를 선택하세요!
         </div>
         <div v-else>
           로그인 후 이용 가능합니다
@@ -159,8 +159,9 @@ export default {
       box-sizing: border-box;
       color: #fff;
       margin: auto;
-      margin-top: 50px;
-      margin-bottom: 100px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      background-color: plum;
 
       hr {
         border-color: #fff;
@@ -281,7 +282,7 @@ export default {
           background-color: transparent;
           border-top-left-radius: 10px;
           border-bottom-left-radius: 10px;
-          color: #fff;
+          color: #000;
           transition: .5s;
         }
 
@@ -319,10 +320,6 @@ export default {
       animation: arrow .8s alternate infinite;
     }
   }
-}
-
-.create-vote-info {
-  background-color:  plum;
 }
 
 @keyframes arrow {

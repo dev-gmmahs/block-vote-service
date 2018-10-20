@@ -106,7 +106,7 @@
         </transition>
       </div>
       <div class="message-area">
-        <a v-if="view !== 0" @click="back">뒤로</a>
+        <a v-if="view !== 0 && view !== 3" @click="back">뒤로</a>
       </div>
       <router-link to="/">홈으로 이동</router-link>
     </div>
@@ -165,12 +165,12 @@ export default {
   },
   methods: {
     check () {
-      if (!this.voteName.match(/^[a-zA-Z가-힣0-9 ]{5,50}$/)) {
+      if (!this.voteName.match(/^[a-zA-Z가-힣0-9. ]{5,50}$/)) {
         this.msg = '투표 명은 영문, 한글, 숫자 조합으로 5~50길이 입니다.'
         return false
       }
 
-      if (!this.voteIntro.match(/^[a-zA-Z가-힣0-9 ]{10,100}$/)) {
+      if (!this.voteIntro.match(/^[a-zA-Z가-힣0-9. ]{10,100}$/)) {
         this.msg = '투표 설명은 영문, 한글, 숫자 조합으로 10~100길이 입니다.'
         return false
       }

@@ -1,21 +1,18 @@
 <template>
   <div id="mypage">
+    <modal v-if="open" @close="open = false" :data="currentVote">
+      <b slot="header">{{ currentVoteName }}</b>
+    </modal>
     <transition name="fade" mode="out-in">
       <div class="mypage-area" v-if="loaded">
-        <div v-if="false">
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
-          <div class="vote-item">A</div>
+        <div v-if="votes">
+          <div class="vote-item" v-for="vote in votes" :key="vote.code" @click="showDetail(vote)">
+            <div class="vote-info-name">{{ vote.name }}</div>
+            <div class="vote-info-term">{{ vote.start }}~{{ vote.end }}</div>
+            <div class="vote-info-code">{{ vote.code }}</div>
+          </div>
         </div>
-        <div class="data-none">
+        <div class="data-none" v-else>
           <h2>투표 데이터가 없습니다</h2>
         </div>
       </div>
@@ -43,24 +40,54 @@
 </template>
 
 <script>
+import Modal from '@/components/Modal.vue'
+
 export default {
   name: 'my-page',
   data () {
     return {
-      loaded: false
+      loaded: false,
+      votes: [],
+      currentVote: {},
+      open: false
     }
+  },
+  components: {
+    'modal': Modal
   },
   created () {
     this.$http.get('/access', {
       headers: { Authorization: 'Bearer ' + this.$store.state.token }
     }).then(r => {
-      this.loaded = true
+      this.getVoteData().then(r => {
+        this.loaded = true
+        this.votes = r.data.vote
+      }).catch(e => {
+        const code = e.response.data.code
+        if (code === 2) {
+          alert('접근 권한이 없습니다. 다시 로그인해주세요')
+          this.$store.commit('LOGOUT')
+          this.$router.push({ path: '/' })
+        } else {
+          alert('알 수 없는 오류가 발생하였습니다.')
+        }
+      })
     }).catch(e => {
-      console.log(e)
-      alert('접근할 수 없습니다. 다시 로그인해주세요')
+      alert('접근 권한이 없습니다. 다시 로그인해주세요')
       this.$store.commit('LOGOUT')
       this.$router.push({ path: '/' })
     })
+  },
+  methods: {
+    getVoteData () {
+      return this.$http.get('/info/vote/created', {
+        headers: { Authorization: 'Bearer ' + this.$store.state.token }
+      })
+    },
+    showDetail (vote) {
+      this.currentVote = vote
+      this.open = true
+    }
   }
 }
 </script>
@@ -98,7 +125,6 @@ export default {
     margin: 0 auto;
     margin-top: 20px;
     width: 40%;
-    height: 80px;
     background-color: #fff;
     padding: 10px;
     box-sizing: border-box;
@@ -106,6 +132,21 @@ export default {
 
     &:hover {
       box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .vote-info-name {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .vote-info-term {
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    .vote-info-code {
+      cursor: text;
+      color: #2f5a69;
     }
   }
 

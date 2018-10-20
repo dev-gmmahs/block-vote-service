@@ -10,7 +10,7 @@
           <h2>제 1 장 총칙</h2>
           <br>
           <h3>제 1 조 (목적)</h3>
-          <p>본 약관은 김지호가 운영하는 웹 사이트 (http://xxx.xxx.xxx)의 제반 서비스의 이용조건 및 절차에 관한 사항 및 기타 필요한 사항을 규정함을 목적으로 한다.</p>
+          <p>본 약관은 GMMAHS Community team이 운영하는 웹 사이트 (http://xxx.xxx.xxx)의 제반 서비스의 이용조건 및 절차에 관한 사항 및 기타 필요한 사항을 규정함을 목적으로 한다.</p>
           <br>
           <h3>제 2 조 (용어의 정의)</h3>
           <p>본 약관에서 사용하는 용어는 다음과 같이 정의한다.<br>
@@ -139,7 +139,7 @@
               <input v-model="id" @keydown="idChecked = false" placeholder="아이디" maxlength="20" required>
               <br>
               <br>
-              <button @click="checkId">중복확인</button>
+              <button type="button" @click="checkId">중복확인</button>
             </div>
             <div class="input-area">
               <input v-model="password_1" type="password" maxlength="18" placeholder="비밀번호" required>
@@ -151,14 +151,16 @@
               <input v-model="name" placeholder="성명" maxlength="5" required>
             </div>
             <div class="input-area">
-              <h6>주민등록번호</h6>
-              <input v-model="resident_1" class="half-input" placeholder="앞 자리" maxlength="6" required>-
-              <input v-model="resident_2" class="half-input" type="password" maxlength="7" placeholder="뒷 자리" required>
+              <select v-model="sex">
+                <option value="0">남성</option>
+                <option value="1">여성</option>
+                <option value="2">기타</option>
+              </select>
             </div>
             <transition name="fade" mode="out-in">
               <p class="message-area" v-if="msg">{{ msg }}</p>
             </transition>
-            <button :class="done ? 'able' : 'disable'">가입</button>
+            <button type="submit" :class="done ? 'able' : 'disable'">가입</button>
           </form>
         </div>
         <div v-else-if="view === 2">
@@ -186,8 +188,7 @@ export default {
       password_1: '',
       password_2: '',
       name: '',
-      resident_1: '',
-      resident_2: '',
+      sex: 0,
       msg: '',
       alreadySubmit: false
     }
@@ -201,6 +202,11 @@ export default {
     check () {
       if (!this.id.match(/^[a-z0-9]{6,20}$/)) {
         this.msg = '아이디는 영문 소문자, 숫자 조합으로 6~20길이 입니다.'
+        return false
+      }
+
+      if (!this.idChecked) {
+        this.msg = '아이디 중복확인을 해주세요'
         return false
       }
 
@@ -219,16 +225,6 @@ export default {
         return false
       }
 
-      if (!(this.resident_1.match(/^[0-9]{6}$/) && this.resident_2.match(/^[0-9]{7}$/))) {
-        this.msg = '주민등록번호를 확실하게 입력해주세요'
-        return false
-      }
-
-      if (!this.idChecked) {
-        this.msg = '아이디 중복확인을 해주세요'
-        return false
-      }
-
       this.msg = ''
       return true
     },
@@ -239,6 +235,7 @@ export default {
       this.$http.post('/check/id', {
         id: this.id
       }).then(r => {
+        alert('사용 가능한 아이디입니다.')
         this.idChecked = true
       }).catch(e => {
         this.idChecked = false
@@ -262,7 +259,7 @@ export default {
         id: this.id,
         password: this.password_1,
         name: this.name,
-        resident: this.resident_1 + this.resident_2
+        sex: this.sex
       }).then(r => {
         if (r.data.success) {
           this.msg = this.name + '님 환영합니다'
