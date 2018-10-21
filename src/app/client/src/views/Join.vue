@@ -241,7 +241,7 @@ export default {
         this.idChecked = false
         const code = e.response.data.code
         if (code === 51) {
-          alert('이미 존재하는 아이디입니다')
+          alert('이미 존재하는 아이디입니다.')
         } else {
           alert('알 수 없는 오류 발생')
         }

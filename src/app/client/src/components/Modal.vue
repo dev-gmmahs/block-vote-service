@@ -17,6 +17,12 @@
               <br>
               <canvas id="time-chart"></canvas>
             </div>
+            <div class="chart-area">
+              <b>참여자 성별 현황</b>
+              <br>
+              <br>
+              <canvas id="gender-chart"></canvas>
+            </div>
           </div>
           <button class="modal-default-button" @click="$emit('close')">확인</button>
         </div>
@@ -58,6 +64,7 @@ export default {
       }).then(r => {
         this.voteData = r.data.vote
         this.createTimeDataChart()
+        this.createGenderDataChart()
       }).catch(e => {
         const code = e.response.data.code
         if (code === 2) {
@@ -83,9 +90,7 @@ export default {
             {
               label: '참여자 수',
               data: data,
-              backgroundColor: ['#00afa8'],
-              borderColor: ["#08aeea"],
-              borderWidth: 2
+              backgroundColor: '#00afa8'
             }
           ]
         },
@@ -100,6 +105,7 @@ export default {
                 },
                 ticks: {
                   beginAtZero: true,
+                  steps: 1,
                   callback (value) {
                     return value + '명'
                   }
@@ -125,7 +131,43 @@ export default {
       })
     },
     createGenderDataChart () {
-      /* 성별 Pie 차트 */
+      const ctx = document.getElementById('gender-chart')
+
+      const labels = this.voteData.gender.map(d => {
+        if (d.gender === 0) {
+          return '남성'
+        } else if (d.gender === 1) {
+          return '여성'
+        } else {
+          return '기타'
+        }
+      })
+      const colors = this.voteData.gender.map(d => {
+        if (d.gender === 0) {
+          return '#36a2eb'
+        } else if (d.gender === 1) {
+          return '#ff6384'
+        } else {
+          return '#ffcd56'
+        }
+      })
+      const data = this.voteData.gender.map(d => d.count)
+
+      this.timeChart = new this.$chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              data: data,
+              backgroundColor: colors
+            }
+          ]
+        },
+        options: {
+          responsive: true
+        }
+      })
     }
   }
 }
@@ -196,7 +238,19 @@ export default {
 }
 
 .modal-default-button {
-  float: right;
+  cursor: pointer;
+  outline: none;
+  border: 2px solid dodgerblue;
+  padding: 8px 14px;
+  background-color: transparent;
+  color: #888;
+  border-radius: 5px;
+  transition: .5s;
+}
+
+.modal-default-button:hover {
+  background-color: dodgerblue;
+  color: #fff;
 }
 
 .modal-enter {

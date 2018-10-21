@@ -82,7 +82,7 @@ export default {
       }
 
       if (!this.$store.state.token) {
-        alert('로그인 후 사용가능한 서비스입니다')
+        alert('로그인 후 사용가능한 서비스입니다.')
         return
       }
 
@@ -126,8 +126,12 @@ export default {
           alert('본 투표에 참여 가능한 인원이 초과되었습니다.')
         } else if (code === 5) {
           alert('회원님은 본 투표에 참여할 권한이 존재하지 않습니다.')
+        } else if (code === 50) {
+          alert('회원님은 본 투표에 이미 참여하셨습니다.')
         } else if (code === 60) {
           alert('참여기간이 만료 되었습니다.')
+        } else if (code === 61) {
+          alert('참여기간이 아닙니다.')
         } else {
           alert('알 수 없는 오류가 발생하였습니다.')
         }

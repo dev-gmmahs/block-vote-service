@@ -96,8 +96,14 @@ export default {
      * @description 서버에 로그아웃 요청
      */
     logout () {
-      console.log('로그아웃')
-      this.$store.commit('LOGOUT')
+      this.$http.post('/logout', {
+        headers: { Authorization: 'Bearer ' + this.$store.state.token }
+      }).catch(e => {
+        console.log(e)
+      }).finally(() => {
+        this.$store.commit('LOGOUT')
+        this.$router.push({ path: '/' })
+      })
     }
   }
 }

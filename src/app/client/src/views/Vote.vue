@@ -166,21 +166,23 @@ export default {
               this.$store.commit('LOGOUT')
               this.$router.push({ path: '/' })
             } else if (code === 3) {
-              alert('투표를 찾을 수 없습니다')
+              alert('투표를 찾을 수 없습니다.')
             } else if (code === 4) {
-              alert('투표 참여 가능 인원이 초과 되었습니다')
+              alert('투표 참여 가능 인원이 초과 되었습니다.')
             } else if (code === 5) {
-              alert('회원님은 참여자 명단에 존재하지 않습니다')
+              alert('회원님은 참여자 명단에 존재하지 않습니다.')
             } else if (code === 40) {
-              alert('투표 해시가 일치하지 않습니다')
+              alert('투표 해시가 일치하지 않습니다.')
             } else if (code === 50) {
-              alert('회원님은 본 투표에 이미 참여하셨습니다')
+              alert('회원님은 본 투표에 이미 참여하셨습니다.')
             } else if (code === 60) {
-              alert('투표 참여 기간이 만료되었습니다')
+              alert('투표 참여 기간이 만료되었습니다.')
+            } else if (code === 61) {
+              alert('투표 참여 기간이 시작되지 않았습니다.')
             } else if (code === 97) {
               alert('투표 데이터 추가 실패')
             } else if (code === 98) {
-              alert('투표 항목이 없습니다')
+              alert('투표 항목이 없습니다.')
             } else {
               alert('알 수 없는 오류')
             }
