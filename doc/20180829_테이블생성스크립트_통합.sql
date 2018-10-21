@@ -9,6 +9,7 @@ USE Vote;
 
 -- 20180923 수정 / 이근혁
 -- 20181020 수정 / 이근혁
+-- 20181021 수정 / 이근혁
 
 CREATE TABLE UserTable (
   UserIDSeq VARCHAR(20) NOT NULL, -- 유저 고유 ID
@@ -49,6 +50,7 @@ CREATE TABLE Vote_Information (
   VotePermission INT NOT NULL,          -- 투표 참여 권한 (0: 아무나, 1: 지정한 사람만)
   VoteLimit INT NOT NULL,               -- 투표 참여 인원
   VoteCreated INT NOT NULL,             -- 투표 정상적으로 생성여부 (0: 생성X, 1: 생성O)
+  VoteFinished INT NOT NULL,            -- 투표 종료 여부 (0: 진행 중, 1: 종료)
   PRIMARY KEY(UniqueNumberSeq)
 );
 
@@ -62,4 +64,10 @@ CREATE TABLE Vote_User (
   UserIDSeq VARCHAR(20) NOT NULL,       -- 투표 참여자 고유 아이디
   UniqueNumberSeq VARCHAR(20) NOT NULL, -- 투표 고유번호
   JoinAlready INT NOT NULL              -- 투표 참여 여부
+);
+
+CREATE TABLE Vote_Result (
+  UniqueNumberSeq VARCHAR(20) NOT NULL, -- 투표 고유번호
+  Vote_Item VARCHAR(300) NOT NULL,      -- 투표 항목
+  Vote_Count INT NOT NULL               -- 항목 투표 수
 );
