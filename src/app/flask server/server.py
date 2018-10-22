@@ -507,6 +507,40 @@ def created_vote():
 응답코드
 0: 성공
 2: 인증 실패
+99: 알 수 없는 아이디
+"""
+# 생성한 투표 데이터 조회
+@app.route("/info/vote/joined", methods=["GET"])
+@jwt_required
+def joined_vote():
+    try:
+        sid = get_jwt_identity()
+        if not accessCheck(sid, request.headers["Authorization"].split()[1]):
+            return jsonify({"code": 2}), 401
+
+        # 해당 유저가 참여한 투표 정보 조회
+        vote = db.execute("""
+        SELECT i.VoteName AS name,
+               i.Vote_JoinCode AS code,
+               i.VoteStart AS start,
+               i.VoteEnd AS end,
+               i.VoteFinished AS finished
+        FROM Vote_User u,
+             Vote_Information i
+        WHERE u.UniqueNumberSeq = i.UniqueNumberSeq
+              AND u.UserIDSeq = %s
+        """, (sid))
+
+        return jsonify({"code": 0, "vote": vote}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"code": 99}), 500
+
+
+"""
+응답코드
+0: 성공
+2: 인증 실패
 6: 해당 투표가 없거나 확인할 권한이 없음
 99: 알 수 없는 아이디
 """
@@ -560,8 +594,28 @@ def vote_detail(code):
         GROUP BY UserSex
         """, (vote_id))
 
+        # 투표 참여 현황 (미검증 - 임시 현황)
+        vote_data = db.execute("""
+        SELECT Vote_Item AS item,
+               COUNT(*) AS count 
+        FROM Vote_Data
+        WHERE UniqueNumberSeq = %s 
+        GROUP BY Vote_Item
+        """, (vote_id))
+
+        vote_data_processed = []
+        for d in vote_data:
+            item = urllib.parse.unquote(base64.b64decode(d["item"]).decode())
+            count = d["count"]
+            vote_data_processed.append({
+                "item": item,
+                "count": count
+            })
+            
+
         return jsonify({"code": 0, "vote": {
             "users": vote_join_user_count,
+            "vote": vote_data_processed,
             "time": vote_data_time,
             "gender": gender_data
         }}), 200

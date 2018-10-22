@@ -12,6 +12,12 @@
               현재 참여자 수: <b>{{ users }}</b>명
             </div>
             <div class="chart-area">
+              <b>투표 현황</b>
+              <br>
+              <br>
+              <canvas id="vote-chart"></canvas>
+            </div>
+            <div class="chart-area">
               <b>시간대별 참여자 현황</b>
               <br>
               <br>
@@ -50,6 +56,7 @@ export default {
     }
   },
   created () {
+    console.log(this.data)
     this.getVoteDetailData()
   },
   methods: {
@@ -63,6 +70,7 @@ export default {
         headers: { Authorization: 'Bearer ' + this.$store.state.token }
       }).then(r => {
         this.voteData = r.data.vote
+        this.createVoteDataChart()
         this.createTimeDataChart()
         this.createGenderDataChart()
       }).catch(e => {
@@ -73,6 +81,37 @@ export default {
           this.$router.push({ path: '/' })
         } else if (code === 6) {
           alert('해당 투표가 존재하지 않거나 조회할 권한이 없습니다.')
+        }
+      })
+    },
+    createVoteDataChart () {
+      const ctx = document.getElementById('vote-chart')
+
+      const labels = this.voteData.vote.map(d => d.item)
+      const data = this.voteData.vote.map(d => d.count)
+
+      this.timeChart = new this.$chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              data: data,
+              backgroundColor: ['#f44336',
+                                '#1e88e5',
+                                '#ffeb3b',
+                                '#43a047',
+                                '#cddc39',
+                                '#8e24aa',
+                                '#ff4081',
+                                '#009688',
+                                '#ffca28',
+                                '#29b6f6'] // 색상 코드
+            }
+          ]
+        },
+        options: {
+          responsive: true
         }
       })
     },

@@ -150,6 +150,7 @@ export default {
         }).then(result => {
           if (result.data.code === 0) {
             setTimeout(() => {
+              this.$store.commit('SET_VOTING_STATUS')
               this.view = 2
             }, 750)
           } else {
@@ -163,6 +164,7 @@ export default {
             this.view = 3
             if (code === 2) {
               alert('사용자 인증에 실패하였습니다. 다시 로그인 해 주세요')
+              this.$store.commit('SET_VOTING_STATUS')
               this.$store.commit('LOGOUT')
               this.$router.push({ path: '/' })
             } else if (code === 3) {

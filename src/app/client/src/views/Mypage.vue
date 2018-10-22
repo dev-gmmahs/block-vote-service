@@ -6,14 +6,29 @@
     <transition name="fade" mode="out-in">
       <div class="mypage-area" v-if="loaded">
         <div v-if="votes">
-          <div class="vote-item" v-for="vote in votes" :key="vote.code" @click="showDetail(vote)">
+          <h3>생성한 투표</h3>
+          <div class="vote-item" v-for="vote in votes" :key="vote.code" @click="showDetail(vote)" v-if="votes">
             <div class="vote-info-name">{{ vote.name }}</div>
             <div class="vote-info-term">{{ vote.start }}~{{ vote.end }}</div>
             <div class="vote-info-code">{{ vote.code }}</div>
           </div>
         </div>
-        <div class="data-none" v-else>
-          <h2>투표 데이터가 없습니다</h2>
+        <div class="vote-item" v-else>
+          <div class="vote-info-code">생성한 투표가 존재하지 않습니다.</div>
+        </div>
+        <hr>
+        <div>
+          <div v-if="joinVotes">
+            <h3>참여한 투표</h3>
+            <div class="vote-item" v-for="vote in joinVotes" :key="vote.code" @click="showDetail(vote)" v-if="joinVotes">
+              <div class="vote-info-name">{{ vote.name }}</div>
+              <div class="vote-info-term">{{ vote.start }}~{{ vote.end }}</div>
+              <div class="vote-info-code">{{ vote.finished === 0 ? '진행 중' : '종료 됨' }}</div>
+            </div>
+          </div>
+          <div class="vote-item" v-else>
+            <div class="vote-info-code">참여한 투표가 존재하지 않습니다.</div>
+          </div>
         </div>
       </div>
       <div class="loading-page" v-else>
@@ -47,7 +62,9 @@ export default {
   data () {
     return {
       loaded: false,
+      voteToggle: true,
       votes: [],
+      joinVotes: [],
       currentVote: {},
       open: false
     }
@@ -60,8 +77,11 @@ export default {
       headers: { Authorization: 'Bearer ' + this.$store.state.token }
     }).then(r => {
       this.getVoteData().then(r => {
-        this.loaded = true
         this.votes = r.data.vote
+        return this.getJoinVoteData()
+      }).then(r => {
+        this.joinVotes = r.data.vote
+        this.loaded = true
       }).catch(e => {
         const code = e.response.data.code
         if (code === 2) {
@@ -84,9 +104,18 @@ export default {
         headers: { Authorization: 'Bearer ' + this.$store.state.token }
       })
     },
+    getJoinVoteData () {
+      return this.$http.get('/info/vote/joined', {
+        headers: { Authorization: 'Bearer ' + this.$store.state.token }
+      })
+    },
     showDetail (vote) {
       this.currentVote = vote
       this.open = true
+    },
+    viewToggleEvent () {
+      console.log(!this.viewToggle)
+      this.viewToggle = !this.viewToggle
     }
   }
 }
@@ -167,6 +196,21 @@ export default {
     .cube {
       background-color: #fff;
     }
+  }
+}
+
+.btn {
+  cursor: pointer;
+  outline: none;
+  border: 2px solid #fff;
+  padding: 8px 14px;
+  background-color: transparent;
+  color: #444;
+  border-radius: 5px;
+  transition: .5s;
+
+  &:hover {
+    background-color: #fff;
   }
 }
 
