@@ -105,6 +105,9 @@ export default {
         this.msg = '투표항목을 선택해주세요'
       }
     },
+    /**
+     * @description 작업증명
+     */
     proof () {
       setTimeout(() => {
         const date = new Date()
@@ -150,7 +153,8 @@ export default {
         }).then(result => {
           if (result.data.code === 0) {
             setTimeout(() => {
-              this.$store.commit('SET_VOTING_STATUS')
+              // 투표 상태 변경
+              this.$store.commit('SET_VOTING_STATUS', false)
               this.view = 2
             }, 750)
           } else {

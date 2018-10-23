@@ -66,15 +66,22 @@ export default {
   name: 'home',
   data () {
     return {
+      // 투표 참여 코드
       joinCode: ''
     }
   },
   methods: {
+    /**
+     * @description 투표 참여 ENTER키 이벤트
+     */
     keydown (ev) {
       if (ev.keyCode === 13) {
         this.join()
       }
     },
+    /**
+     * @description 투표 참여 요청
+     */
     join () {
       if (!this.joinCode) {
         alert('코드를 정확하게 입력해주세요')

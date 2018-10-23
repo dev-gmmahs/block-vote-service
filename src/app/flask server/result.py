@@ -1,3 +1,4 @@
+from database import database_manager
 import threading
 import datetime
 import hashlib
@@ -6,8 +7,8 @@ import urllib.parse
 
 class ResultManager():
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        self.db = database_manager("localhost", 3306, "root", "1234", "vote")
 
     
     def checkTime(self):

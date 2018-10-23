@@ -12,6 +12,7 @@ import random
 import string
 import base64
 import datetime
+import multiprocessing
 import urllib.parse
 
 app = Flask(__name__)
@@ -41,11 +42,19 @@ def accessCheck(sid, token):
     except:
         return False
 
+
 # length 길이의 임의의 랜덤문자 생성
 def randString(length):
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase +\
     string.ascii_lowercase +\
     string.digits) for _ in range(length))
+
+
+
+def result_process():
+    result_manager = ResultManager()
+    result_manager.checkTime()
+
 
 
 @app.route("/", methods=["GET"])
@@ -159,7 +168,10 @@ def vote():
             else:
                 print("User: {} 투표 참여기록이 존재합니다".format(sid))
 
-        hashingData = (str(vote_undecode) + str(currentTime) + str(voteCode) + str(nonce)).encode("utf-8")
+        hashingData = (str(vote_undecode) +\
+                       str(currentTime) +\
+                       str(voteCode) +\
+                       str(nonce)).encode("utf-8")
         print(hashingData)
         checkHash = hashlib.sha256(hashingData).hexdigest()
 
@@ -462,12 +474,67 @@ def create():
         return jsonify({"code": 99}), 500
 
 
+"""
+응답코드
+0: 성공
+2: 인증 실패
+6: 해당 투표가 없거나 확인할 권한이 없음
+7: 투표 진행 중
+99: 알 수 없는 오류
+"""
 # 투표 결과 라우팅
-@app.route("/info/vote/result", methods=["GET"])
+@app.route("/info/vote/result/<code>", methods=["GET"])
 @jwt_required
-def result():
-    result = accessCheck(get_jwt_identity(), request.headers["Authorization"].split()[1])
-    return "<h1>Hello {}</h1>".format(str(result))
+def result(code):
+    try:
+        sid = get_jwt_identity()
+        if not accessCheck(sid, request.headers["Authorization"].split()[1]):
+            return jsonify({"code": 2}), 401
+
+        # 투표 조회
+        vote = db.execute("""
+        SELECT UniqueNumberSeq
+        FROM Vote_Information
+        WHERE Vote_JoinCode = %s
+        """, (code))
+
+        if not vote:
+            return jsonify({"code": 6}), 404
+
+        # 투표 고유번호
+        vote_id = vote[0]["UniqueNumberSeq"]
+
+        # 참여 기록 확인
+        join_check = db.execute("""
+        SELECT COUNT(*) AS COUNT
+        FROM Vote_User
+        WHERE UniqueNumberSeq = %s
+              AND UserIDSeq = %s
+        """, (vote_id, sid))
+
+        if join_check[0]["COUNT"] == 0:
+            return jsonify({"code": 6}), 404
+
+        # 투표 결과 확인
+        vote_result = db.execute("""
+        SELECT Vote_Item AS item,
+                Vote_Count AS count
+        FROM Vote_Result
+        WHERE UniqueNumberSeq = %s
+        GROUP BY Vote_Item
+        """, (vote_id))
+
+        # 투표 결과가 없을 경우
+        if len(vote_result) == 0:
+            return jsonify({"code": 7}), 403
+
+        return jsonify({
+            "code": 0,
+            "result": vote_result
+        }), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"code": 99}), 500
 
 
 """
@@ -492,7 +559,8 @@ def created_vote():
                VoteStart AS start, 
                VoteEnd as end, 
                VotePermission AS permission, 
-               VoteLimit as lim
+               VoteLimit as lim,
+               VoteFinished as finished
         FROM Vote_Information 
         WHERE UserID = %s
         """, (sid))
@@ -520,11 +588,13 @@ def joined_vote():
 
         # 해당 유저가 참여한 투표 정보 조회
         vote = db.execute("""
-        SELECT i.VoteName AS name,
-               i.Vote_JoinCode AS code,
-               i.VoteStart AS start,
-               i.VoteEnd AS end,
-               i.VoteFinished AS finished
+        SELECT i.VoteName AS name, 
+               i.Vote_JoinCode as code, 
+               i.VoteStart AS start, 
+               i.VoteEnd as end, 
+               i.VotePermission AS permission, 
+               i.VoteLimit as lim,
+               i.VoteFinished as finished
         FROM Vote_User u,
              Vote_Information i
         WHERE u.UniqueNumberSeq = i.UniqueNumberSeq
@@ -555,70 +625,77 @@ def vote_detail(code):
 
         # 투표 조회
         vote = db.execute("""
-        SELECT UniqueNumberSeq
+        SELECT UniqueNumberSeq,
+               VoteFinished
         FROM Vote_Information
         WHERE Vote_JoinCode = %s
-              AND UserID = %s
-        """, (code, sid))
+        """, (code))
 
         if not vote:
             return jsonify({"code": 6}), 404
 
         # 투표 고유번호
         vote_id = vote[0]["UniqueNumberSeq"]
+        vote_finished = vote[0]["VoteFinished"]
 
-        # 참여 유저 수 조회
-        vote_join_user_count = db.execute("""
-        SELECT COUNT(*) AS users
-        FROM Vote_Data
-        WHERE UniqueNumberSeq = %s
-        """, (vote_id))[0]["users"]
+        if vote_finished:
+            return jsonify({"code": 0, "vote": {
+                "finished": True
+            }}), 200
+        else:
+            # 참여 유저 수 조회
+            vote_join_user_count = db.execute("""
+            SELECT COUNT(*) AS users
+            FROM Vote_Data
+            WHERE UniqueNumberSeq = %s
+            """, (vote_id))[0]["users"]
 
-        # 투표 참여 시간 조회 (1시간 단위, 00시 ~ 24시)
-        vote_data_time = db.execute("""
-        SELECT HOUR(Vote_JoinDate) AS hour,
-               COUNT(*) AS count
-        FROM Vote_Data
-        WHERE UniqueNumberSeq = %s
-        GROUP BY HOUR(Vote_JoinDate)
-        """, (vote_id))
+            # 투표 참여 시간 조회 (1시간 단위, 00시 ~ 24시)
+            vote_data_time = db.execute("""
+            SELECT HOUR(Vote_JoinDate) AS hour,
+                COUNT(*) AS count
+            FROM Vote_Data
+            WHERE UniqueNumberSeq = %s
+            GROUP BY HOUR(Vote_JoinDate)
+            """, (vote_id))
 
-        # 투표 참여자 성별 인원 조회
-        gender_data = db.execute("""
-        SELECT u.UserSex AS gender,
-               count(*) AS count
-        FROM UserTable u,
-             Vote_Data v
-        WHERE u.UserIDSeq = v.UserIDSeq
-              AND v.UniqueNumberSeq = %s
-        GROUP BY UserSex
-        """, (vote_id))
+            # 투표 참여자 성별 인원 조회
+            gender_data = db.execute("""
+            SELECT u.UserSex AS gender,
+                count(*) AS count
+            FROM UserTable u,
+                Vote_Data v
+            WHERE u.UserIDSeq = v.UserIDSeq
+                AND v.UniqueNumberSeq = %s
+            GROUP BY UserSex
+            """, (vote_id))
 
-        # 투표 참여 현황 (미검증 - 임시 현황)
-        vote_data = db.execute("""
-        SELECT Vote_Item AS item,
-               COUNT(*) AS count 
-        FROM Vote_Data
-        WHERE UniqueNumberSeq = %s 
-        GROUP BY Vote_Item
-        """, (vote_id))
+            # 투표 참여 현황 (미검증 - 임시 현황)
+            vote_data = db.execute("""
+            SELECT Vote_Item AS item,
+                COUNT(*) AS count 
+            FROM Vote_Data
+            WHERE UniqueNumberSeq = %s 
+            GROUP BY Vote_Item
+            """, (vote_id))
 
-        vote_data_processed = []
-        for d in vote_data:
-            item = urllib.parse.unquote(base64.b64decode(d["item"]).decode())
-            count = d["count"]
-            vote_data_processed.append({
-                "item": item,
-                "count": count
-            })
-            
+            vote_data_processed = []
+            for d in vote_data:
+                item = urllib.parse.unquote(base64.b64decode(d["item"]).decode())
+                count = d["count"]
+                vote_data_processed.append({
+                    "item": item,
+                    "count": count
+                })
+                
 
-        return jsonify({"code": 0, "vote": {
-            "users": vote_join_user_count,
-            "vote": vote_data_processed,
-            "time": vote_data_time,
-            "gender": gender_data
-        }}), 200
+            return jsonify({"code": 0, "vote": {
+                "users": vote_join_user_count,
+                "vote": vote_data_processed,
+                "time": vote_data_time,
+                "gender": gender_data,
+                "finished": False
+            }}), 200
     except Exception as e:
         print(e)
         return jsonify({"code": 99}), 500
@@ -683,7 +760,8 @@ def vote_info(code):
         FROM 
                Vote_Information i, 
                UserTable u 
-        WHERE Vote_JoinCode = %s AND u.UserIDSeq = i.UserID
+        WHERE Vote_JoinCode = %s 
+              AND u.UserIDSeq = i.UserID
         """, (code))
 
         # 만약 조회된 투표가 없을 경우
@@ -779,6 +857,45 @@ def vote_info(code):
         return jsonify({"code": 99, "data": {}}), 500
 
 
+"""
+0: 성공
+8: 투표 블록 데이터 없음
+99: 알 수 없는 오류
+"""
+# 투표 블록데이터 조회
+@app.route("/block/<code>", methods=["GET"])
+@jwt_required
+def block_info(code):
+    try:
+        sid = get_jwt_identity()
+        if not accessCheck(sid, request.headers["Authorization"].split()[1]):
+            return jsonify({"code": 2, "data": {}}), 401
+
+        blocks = db.execute("""
+        SELECT Vote_JoinDate AS date,
+               Vote_Item AS item,
+               nonce,
+               Hash AS hash,
+               Prev_Hash AS previous_hash
+        FROM Vote_Data
+        WHERE UniqueNumberSeq = (
+            SELECT UniqueNumberSeq
+            FROM Vote_Information
+            WHERE Vote_JoinCode = %s
+        )
+        ORDER BY UniqueDataSeq
+        LIMIT 0, 100
+        """, (code))
+
+        # 블록이 없을 경우
+        if len(blocks) == 0:
+            return jsonify({"code": 8}), 404
+
+        return jsonify({"code": 0, "block": blocks}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"code": 99}), 500
+
 # 이미지
 @app.route("/img/<name>", methods=["GET"])
 def img(name):
@@ -811,6 +928,6 @@ def redirect(name):
 if __name__ == "__main__":
     # 데이터베이스 인스턴스 생성
     db = database_manager("localhost", 3306, "root", "1234", "vote")
-    result_manager = ResultManager(db)
-    result_manager.checkTime()
+    process = multiprocessing.Process(target=result_process, args=())
+    process.start()
     app.run(debug=True, host='0.0.0.0', port='80')

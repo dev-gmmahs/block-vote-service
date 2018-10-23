@@ -144,6 +144,9 @@ export default {
   components: {
     'item': Item
   },
+  /**
+   * @description 컴포넌트 생성 직후 현재 시간 데이터 저장
+   */
   created () {
     for (let i = 0; i < 24; i++) {
       this.hours.push(i)
@@ -164,6 +167,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * @description 폼 데이터 검증
+     */
     check () {
       if (!this.voteName.match(/^[a-zA-Z가-힣0-9. ]{5,50}$/)) {
         this.msg = '투표 명은 영문, 한글, 숫자 조합으로 5~50길이 입니다.'
@@ -243,6 +249,9 @@ export default {
       this.msg = ''
       return true
     },
+    /**
+     * @description 투표 항목, 참여자 데이터 체크
+     */
     itemCheck () {
       if (this.limit === 1 && this.voteTarget === 1 && this.limitCount > this.targetList.length) {
         this.msg = '참여자 ID를 모두 입력해주세요'
@@ -259,6 +268,9 @@ export default {
       this.msg = ''
       return true
     },
+    /**
+     * @description 00 포맷으로 변경
+     */
     toZero (n) {
       n = n.toString()
       if (n.length !== 2) {
@@ -267,6 +279,9 @@ export default {
         return n
       }
     },
+    /**
+     * @description 참여자 추가
+     */
     targetKeyDown (e) {
       this.alreadyInList = false
       if (this.limit === 1 && this.limitCount <= this.targetList.length) {

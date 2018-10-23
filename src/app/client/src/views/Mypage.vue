@@ -10,7 +10,8 @@
           <div class="vote-item" v-for="vote in votes" :key="vote.code" @click="showDetail(vote)" v-if="votes">
             <div class="vote-info-name">{{ vote.name }}</div>
             <div class="vote-info-term">{{ vote.start }}~{{ vote.end }}</div>
-            <div class="vote-info-code">{{ vote.code }}</div>
+            <br>
+            <div class="vote-info-code">{{ vote.finished ? '종료 됨' : '참여코드: ' + vote.code }}</div>
           </div>
         </div>
         <div class="vote-item" v-else>
@@ -112,10 +113,6 @@ export default {
     showDetail (vote) {
       this.currentVote = vote
       this.open = true
-    },
-    viewToggleEvent () {
-      console.log(!this.viewToggle)
-      this.viewToggle = !this.viewToggle
     }
   }
 }

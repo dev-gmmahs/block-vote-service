@@ -32,9 +32,9 @@ export default {
   name: 'login',
   data () {
     return {
-      id: '',
-      password: '',
-      msg: ''
+      id: '', // 아이디
+      password: '', // 비밀번호
+      msg: '' // 메시지
     }
   },
   methods: {

@@ -6,6 +6,7 @@ import Join from './views/Join.vue'
 import Create from './views/Create.vue'
 import Vote from './views/Vote.vue'
 import Mypage from './views/Mypage.vue'
+import Blocks from './views/Blocks.vue'
 
 Vue.use(Router)
 
@@ -42,6 +43,11 @@ export default new Router({
       path: '/mypage',
       name: 'mypage',
       component: Mypage
+    },
+    {
+      path: '/blocks',
+      name: 'blocks',
+      component: Blocks
     }
   ]
 })

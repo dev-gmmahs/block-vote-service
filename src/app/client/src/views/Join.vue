@@ -181,16 +181,16 @@ export default {
   name: 'join',
   data () {
     return {
-      view: 0,
-      agree: false,
-      id: '',
-      idChecked: false,
-      password_1: '',
-      password_2: '',
-      name: '',
-      sex: 0,
-      msg: '',
-      alreadySubmit: false
+      view: 0, // 뷰 데이터 (0: 첫 화면, 1: 두 번째 화면..)
+      agree: false, // 약관 동의 여부
+      id: '', // 유저 아이디
+      idChecked: false, // 유저 아이디 체크 확인
+      password_1: '', // 비밀번호
+      password_2: '', // 비밀번호 재입력
+      name: '', // 성명
+      sex: 0, // 성별
+      msg: '', // 메시지
+      alreadySubmit: false // 제출 여부 확인
     }
   },
   computed: {
@@ -199,6 +199,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * @description 폼 입력 검증
+     */
     check () {
       if (!this.id.match(/^[a-z0-9]{6,20}$/)) {
         this.msg = '아이디는 영문 소문자, 숫자 조합으로 6~20길이 입니다.'
