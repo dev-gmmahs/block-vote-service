@@ -26,6 +26,14 @@ db = None
 result_manager = None
 
 
+# 로그 출력 함수
+def log(msg, ip=None):
+    if not ip:
+        ip = "00.00.00.00"
+    date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print("{} - - [{}] {}".format(ip, date, msg))
+
+
 # 토큰 검증
 def accessCheck(sid, token):
     try:
@@ -106,17 +114,17 @@ def vote():
 
         # 투표가 없는 경우
         if len(vote_info) == 0:
-            print("투표를 찾을 수 없습니다")
+            log("투표를 찾을 수 없습니다")
             return jsonify({"success": False, "code": 3}), 404
 
         # 투표 참여기간 확인
         now = datetime.datetime.now()
         if (now <= vote_info[0]["VoteStart"]):
-            print("해당 투표 참여 기간이 아닙니다")
+            log("해당 투표 참여 기간이 아닙니다")
             return jsonify({"success": False, "code": 61}), 401
 
         if (now >= vote_info[0]["VoteEnd"]):
-            print("해당 투표 참여 기간이 끝났습니다")
+            log("해당 투표 참여 기간이 끝났습니다")
             return jsonify({"success": False, "code": 60}), 401
 
         vote_limit = db.execute("""
@@ -128,7 +136,7 @@ def vote():
 
         # 참여 가능 인원이 초과된 경우
         if vote_info[0]["VoteLimit"] <= vote_limit[0]["COUNT"]:
-            print("해당 투표는 참여가능 인원이 가득 찼습니다")
+            log("해당 투표는 참여가능 인원이 가득 찼습니다")
             return jsonify({"success": False, "code": 4}), 401
 
         alreadyCheck = db.execute("""
@@ -141,7 +149,7 @@ def vote():
 
         # 투표 참여했는지 확인
         if len(alreadyCheck) != 0:
-            print("User: {} 이미 참여한 유저입니다".format(sid))
+            log("User: {} 이미 참여한 유저입니다".format(sid))
             return jsonify({"success": False, "code": 50}), 403
 
         # 참여자 명단 / 오류로 인해 참여되지 않은 유저 조회
@@ -156,7 +164,7 @@ def vote():
         # 해당 유저가 투표에 참여했는지 확인/참여자 명단에 있는지 확인
         if vote_info[0]["VotePermission"] == 1:
             if len(user_list) == 0:
-                print("User: {} 투표 참여자 명단에 존재하지 않습니다".format(sid))
+                log("User: {} 투표 참여자 명단에 존재하지 않습니다".format(sid))
                 return jsonify({"success": False, "code": 5}), 401
         else:
             if len(user_list) == 0:
@@ -164,19 +172,19 @@ def vote():
                 INSERT INTO Vote_User 
                 VALUES (%s, %s, 0)
                 """, (sid, voteCode))
-                print("User: {} 투표 참여자로 기록 됨".format(sid))
+                log("User: {} 투표 참여자로 기록 됨".format(sid))
             else:
-                print("User: {} 투표 참여기록이 존재합니다".format(sid))
+                log("User: {} 투표 참여기록이 존재합니다".format(sid))
 
         hashingData = (str(vote_undecode) +\
                        str(currentTime) +\
                        str(voteCode) +\
                        str(nonce)).encode("utf-8")
-        print(hashingData)
+
         checkHash = hashlib.sha256(hashingData).hexdigest()
 
         if checkHash != req["hash"]:
-            print("투표 데이터 해시가 일치하지 않습니다")
+            log("투표 데이터 해시가 일치하지 않습니다")
             return jsonify({"success": False, "code": 40}), 403
 
         # 이전 투표 데이터 해시
@@ -207,10 +215,10 @@ def vote():
             (UniqueNumberSeq, UserIDSeq, Vote_JoinDate, Vote_Item, nonce, Hash, Prev_Hash) 
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (voteCode, sid, currentTime, vote_undecode, nonce, req["hash"], prev_hash))
-            print("User: {} 투표 데이터 추가".format(sid))
+            log("User: {} 투표 데이터 추가".format(sid))
 
             if inserted == 0:
-                print("User: {} 투표 데이터 추가 실패".format(sid))
+                log("User: {} 투표 데이터 추가 실패".format(sid))
                 db.update("""
                 DELETE FROM Vote_User 
                 WHERE UserIDSeq = %s 
@@ -224,18 +232,18 @@ def vote():
             WHERE UserIDSeq = %s 
                   AND UniqueNumberSeq = %s
             """, (sid, voteCode))
-            print("User: {} 투표 참여 완료 설정".format(sid))
+            log("User: {} 투표 참여 완료 설정".format(sid))
 
             if result and inserted:
-                print("User: {} 참여 완료, ({})".format(sid, vote))
+                log("User: {} 참여 완료, ({})".format(sid, vote))
                 return jsonify({"success": True, "code": 0}), 200
             else:
-                print("User: {} 참여 실패".format(sid))
+                log("User: {} 참여 실패".format(sid))
                 return jsonify({"success": False, "code": 99}), 404
         else:
             return jsonify({"success": False, "code": 98}), 404
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"success": False, "code": 99}), 500
 
 
@@ -282,10 +290,11 @@ def regist():
         if result is 0:
             return jsonify({"success": False, "already": False}), 200
         
-        print("User registered:", s_id)
+        log("유저 가입 됨")
 
         return jsonify({"success": True, "already": False})
-    except:
+    except Exception as e:
+        log(e)
         return jsonify({"success": False, "already": False})
 
 
@@ -309,7 +318,7 @@ def login():
         """, (id_, id_, password))
 
         if len(result) == 0:
-            print("Unknown user")
+            log("알 수 없는 유저입니다.")
             return jsonify({"msg": "아이디와 비밀번호를 확인해주세요"}), 404
         elif len(result) > 1:
             return jsonify({"msg": "유저 데이터 에러, 관리자에게 문의하세요"}), 500
@@ -331,9 +340,10 @@ def login():
         VALUES (%s, %s, %s)
         """, (result[0]["UserIDSeq"], access_token, current_time))
 
-        print(current_time, "User logged in:", access_token)
+        log("유저 로그인: {}..".format(access_token[0:20]))
         return jsonify({"token": access_token}), 200
-    except:
+    except Exception as e:
+        log(e)
         return jsonify({"msg": "알 수 없는 오류", "token": ""}), 500
 
 
@@ -347,10 +357,10 @@ def logout():
         WHERE UserIDSeq = %s
         """, (current_user)) == 0:
             return jsonify(False), 500
-        print("User logout")
+        log("유저 로그아웃")
         return jsonify(True), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify(False), 500
 
 
@@ -361,6 +371,7 @@ def access():
     try:
         sid = get_jwt_identity()
         if accessCheck(sid, request.headers["Authorization"].split()[1]):
+            log("접근 가능한 유저입니다.")
             # 클라이언트에게 성공 전달
             return jsonify(True), 200
         else:
@@ -372,7 +383,7 @@ def access():
 # 토큰 만료 핸들링
 @jwt.expired_token_loader
 def expired_token():
-    print("토큰 만료 됨")
+    log("토큰 만료 됨")
     return jsonify({"msg": "토큰 만료 됨"}), 401
 
 
@@ -455,7 +466,7 @@ def create():
                     INSERT INTO Vote_User VALUES (%s, %s, %s)
                     """, (target, vote_id, 0))
                 except Exception as e:
-                    print(e)
+                    log(e)
 
         affected += db.update("""
             UPDATE Vote_Information 
@@ -470,7 +481,7 @@ def create():
         # 정상적으로 처리 됨
         return jsonify({"code": 0, "vote_code": vote_code}), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99}), 500
 
 
@@ -533,7 +544,7 @@ def result(code):
             "result": vote_result
         }), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99}), 500
 
 
@@ -567,7 +578,7 @@ def created_vote():
 
         return jsonify({"code": 0, "vote": vote}), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99}), 500
 
 
@@ -603,7 +614,7 @@ def joined_vote():
 
         return jsonify({"code": 0, "vote": vote}), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99}), 500
 
 
@@ -697,7 +708,7 @@ def vote_detail(code):
                 "finished": False
             }}), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99}), 500
 
 
@@ -712,7 +723,6 @@ def vote_detail(code):
 def check_id():
     try:
         req = request.get_json()
-        print(req["id"])
         result = db.execute("""
         SELECT COUNT(*) AS COUNT 
         FROM UserTable 
@@ -722,9 +732,10 @@ def check_id():
         if result[0]["COUNT"] == 0:
             return jsonify({"success": True, "code": 0}), 200
         else:
+            log("이미 존재하는 아이디 입니다. ({})".format(req["id"]))
             return jsonify({"success": False, "code": 51}), 409
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"success": False, "code": 99}), 500
 
 
@@ -766,16 +777,16 @@ def vote_info(code):
 
         # 만약 조회된 투표가 없을 경우
         if len(vote_data) == 0:
-            print("투표가 존재하지 않습니다")
+            log("투표가 존재하지 않습니다")
             return jsonify({"code": 3, "data": {}}), 404
 
         now = datetime.datetime.now()
         if (now <= vote_data[0]["VoteStart"]):
-            print("해당 투표 참여 기간이 아닙니다")
+            log("해당 투표 참여 기간이 아닙니다")
             return jsonify({"code": 61, "data": {}}), 403
 
         if (now >= vote_data[0]["VoteEnd"]):
-            print("해당 투표 참여 기간이 끝났습니다")
+            log("해당 투표 참여 기간이 끝났습니다")
             return jsonify({"code": 60, "data": {}}), 403
 
         # 참여 여부 확인
@@ -787,10 +798,8 @@ def vote_info(code):
               AND JoinAlready = 1
         """, (vote_data[0]["UniqueNumberSeq"], sid))
 
-        print(already, vote_data[0]["UniqueNumberSeq"], sid)
-
         if already[0]["COUNT"] != 0:
-            print("이미 참여한 유저입니다.")
+            log("이미 참여한 유저입니다.")
             return jsonify({"code": 50, "data": {}}), 403
         
 
@@ -853,7 +862,7 @@ def vote_info(code):
 
         return jsonify({"code": 0, "data": res_data}), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99, "data": {}}), 500
 
 
@@ -893,7 +902,7 @@ def block_info(code):
 
         return jsonify({"code": 0, "block": blocks}), 200
     except Exception as e:
-        print(e)
+        log(e)
         return jsonify({"code": 99}), 500
 
 # 이미지
@@ -927,7 +936,10 @@ def redirect(name):
 
 if __name__ == "__main__":
     # 데이터베이스 인스턴스 생성
+    log("데이터베이스 인스턴스 생성")
     db = database_manager("localhost", 3306, "root", "1234", "vote")
+    log("투표 결과검증 프로세스 생성 및 시작")
     process = multiprocessing.Process(target=result_process, args=())
     process.start()
-    app.run(debug=True, host='0.0.0.0', port='80')
+    log("서버 시작 됨")
+    app.run(debug=False, host='0.0.0.0', port='80')

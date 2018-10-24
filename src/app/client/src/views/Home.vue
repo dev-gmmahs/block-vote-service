@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <info-modal :view="modalView" v-if="open" @close="open = false"/>
     <div class="gradient-panel">
       <img src="@/assets/vote.png" class="vote-image">
       <div class="vote-code-area">
@@ -17,7 +18,7 @@
       <h2>정보</h2>
     </div>
     <div class="content">
-      <div class="info-image first">
+      <div class="info-image first" @click="modal(1)">
         <fa-icon icon="users"/>
         <br>
         <div>
@@ -25,7 +26,7 @@
           누구나 참여할 수 있습니다
         </div>
       </div>
-      <div class="info-image second">
+      <div class="info-image second" @click="modal(2)">
         <fa-icon icon="user-shield"/>
         <br>
         <div>
@@ -33,7 +34,7 @@
           안전하게 저장합니다
         </div>
       </div>
-      <div class="info-image third">
+      <div class="info-image third" @click="modal(3)">
         <fa-icon icon="smile-wink"/>
         <br>
         <div>
@@ -61,14 +62,22 @@
 </template>
 
 <script>
+import InfoModal from '@/components/InfoModal.vue'
 
 export default {
   name: 'home',
   data () {
     return {
       // 투표 참여 코드
-      joinCode: ''
+      joinCode: '',
+      // 모달 열기/닫기
+      open: false,
+      // 모달 뷰 번호
+      modalView: 1
     }
+  },
+  components: {
+    'info-modal': InfoModal
   },
   methods: {
     /**
@@ -143,6 +152,10 @@ export default {
           alert('알 수 없는 오류가 발생하였습니다.')
         }
       })
+    },
+    modal (view) {
+      this.open = true
+      this.modalView = view
     }
   }
 }
@@ -180,6 +193,7 @@ export default {
     }
 
     .info-image {
+      cursor: pointer;
       display: inline-block;
       padding: 20px;
       border-radius: 12px;

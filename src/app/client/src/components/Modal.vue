@@ -54,7 +54,11 @@ export default {
   props: ['data'],
   data () {
     return {
-      voteData: null
+      voteData: null,
+      resultChart: null,
+      voteChart: null,
+      timeChart: null,
+      genderChart: null
     }
   },
   computed: {
@@ -72,7 +76,7 @@ export default {
   },
   methods: {
     /**
-     * @description 투표 상세정보 데이터를 조회합니다 
+     * @description 투표 상세정보 데이터를 조회합니다
      * (참여자 수, 참여 시간 분포, 참여자 성별 현황)
      */
     getVoteDetailData () {
@@ -144,13 +148,14 @@ export default {
     createVoteResultChart (data) {
       const ctx = document.getElementById('vote-chart')
 
-      let labels = [], datas = []
+      let labels = []
+      let datas = []
       data.forEach(d => {
         labels.push(d.item)
         datas.push(d.count)
       })
 
-      new this.$chart(ctx, {
+      this.resultChart = new this.$chart(ctx, {
         type: 'pie',
         data: {
           labels: labels,
@@ -158,15 +163,15 @@ export default {
             {
               data: datas,
               backgroundColor: ['#f44336',
-                                '#1e88e5',
-                                '#ffeb3b',
-                                '#43a047',
-                                '#cddc39',
-                                '#8e24aa',
-                                '#ff4081',
-                                '#009688',
-                                '#ffca28',
-                                '#29b6f6'] // 색상 코드
+                '#1e88e5',
+                '#ffeb3b',
+                '#43a047',
+                '#cddc39',
+                '#8e24aa',
+                '#ff4081',
+                '#009688',
+                '#ffca28',
+                '#29b6f6'] // 색상 코드
             }
           ]
         },
@@ -184,7 +189,7 @@ export default {
       const labels = this.voteData.vote.map(d => d.item)
       const data = this.voteData.vote.map(d => d.count)
 
-      new this.$chart(ctx, {
+      this.voteChart = new this.$chart(ctx, {
         type: 'pie',
         data: {
           labels: labels,
@@ -192,15 +197,15 @@ export default {
             {
               data: data,
               backgroundColor: ['#f44336',
-                                '#1e88e5',
-                                '#ffeb3b',
-                                '#43a047',
-                                '#cddc39',
-                                '#8e24aa',
-                                '#ff4081',
-                                '#009688',
-                                '#ffca28',
-                                '#29b6f6'] // 색상 코드
+                '#1e88e5',
+                '#ffeb3b',
+                '#43a047',
+                '#cddc39',
+                '#8e24aa',
+                '#ff4081',
+                '#009688',
+                '#ffca28',
+                '#29b6f6'] // 색상 코드
             }
           ]
         },
@@ -218,7 +223,7 @@ export default {
       const labels = this.voteData.time.map(d => d.hour)
       const data = this.voteData.time.map(d => d.count)
 
-      new this.$chart(ctx, {
+      this.timeChart = new this.$chart(ctx, {
         type: 'bar',
         data: {
           labels: labels,
@@ -292,7 +297,7 @@ export default {
       })
       const data = this.voteData.gender.map(d => d.count)
 
-      this.timeChart = new this.$chart(ctx, {
+      this.genderChart = new this.$chart(ctx, {
         type: 'doughnut',
         data: {
           labels: labels,
@@ -338,83 +343,4 @@ export default {
   }
 }
 
-.modal-mask {
-  position: fixed;
-  z-index: 9998;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, .5);
-  display: table;
-  transition: opacity .3s ease;
-}
-
-.modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.modal-container {
-  width: 50%;
-  height: 64%;
-  margin: 0px auto;
-  padding: 20px 30px;
-  background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
-  box-sizing: border-box;
-  transition: all .3s ease;
-  font-family: Helvetica, Arial, sans-serif;
-  overflow-y: auto;
-}
-
-@media screen and (max-width: 768px) {
-    .modal-container {
-      width: 90%;
-    }
-  }
-
-.modal-header {
-  margin-top: 0;
-  color: #42b983;
-}
-
-.modal-body {
-  margin: 20px 0;
-
-  .user-count {
-    margin: 10px auto;
-  }
-}
-
-.modal-default-button {
-  cursor: pointer;
-  outline: none;
-  border: 2px solid dodgerblue;
-  padding: 8px 14px;
-  background-color: transparent;
-  color: #888;
-  border-radius: 5px;
-  transition: .5s;
-}
-
-.modal-default-button:hover {
-  background-color: dodgerblue;
-  color: #fff;
-}
-
-.modal-enter {
-  opacity: 0;
-}
-
-.modal-leave-active {
-  opacity: 0;
-}
-
-.modal-enter .modal-container,
-.modal-leave-active .modal-container {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
-}
 </style>
