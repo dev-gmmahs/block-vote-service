@@ -1,11 +1,13 @@
 # flask
 # pymysql
 # flask_jwt_extended
+# Flask-SSLify
 
-from flask import Flask, request, render_template, send_from_directory, jsonify
+from flask import Flask, request, render_template, send_from_directory, jsonify, redirect
 from database import database_manager
 from result import ResultManager
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_sslify import SSLify
 import datetime
 import hashlib
 import random
@@ -16,6 +18,9 @@ import multiprocessing
 import urllib.parse
 
 app = Flask(__name__)
+
+# HTTP 요청을 HTTPS 요청으로 리다이렉트
+sslify = SSLify(app)
 
 md5 = hashlib.md5()
 md5.update("sample".encode())
@@ -30,7 +35,7 @@ result_manager = None
 def log(msg, ip=None):
     if not ip:
         ip = "00.00.00.00"
-    date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print("{} - - [{}] {}".format(ip, date, msg))
 
 
@@ -53,7 +58,7 @@ def accessCheck(sid, token):
 
 # length 길이의 임의의 랜덤문자 생성
 def randString(length):
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase +\
+    return "".join(random.SystemRandom().choice(string.ascii_uppercase +\
     string.ascii_lowercase +\
     string.digits) for _ in range(length))
 
@@ -946,7 +951,7 @@ def favicon():
 
 
 @app.route("/<name>", methods=["GET"])
-def redirect(name):
+def redirect_home(name):
     return render_template("index.html")
 
 
@@ -958,6 +963,6 @@ if __name__ == "__main__":
     process = multiprocessing.Process(target=result_process, args=())
     process.start()
     log("서버 시작 됨")
-    app.run(debug=False, host='0.0.0.0', ssl_context=\
-    ('/etc/letsencrypt/live/www.coidroid.com/cert.pem',\
-    '/etc/letsencrypt/live/www.coidroid.com/key.pem'), port=7777)
+    app.run(debug=False, host="0.0.0.0", ssl_context=\
+    ("/etc/letsencrypt/live/www.coidroid.com/cert.pem",\
+    "/etc/letsencrypt/live/www.coidroid.com/privkey.pem"), port=7778)

@@ -164,7 +164,7 @@ export default {
    * @description 컴포넌트 생성 직후 현재 시간 데이터 저장
    */
   created () {
-    if (!this.$store.state.voteCode || this.$store.state.voteData === {}) {
+    if (!this.$store.state.token) {
       alert('잘못된 접근입니다')
       this.$router.push({ path: '/' })
     }
