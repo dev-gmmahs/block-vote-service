@@ -58,9 +58,9 @@ def randString(length):
     string.digits) for _ in range(length))
 
 
-
+# 투표 결과 계산 프로세스
 def result_process():
-    result_manager = ResultManager()
+    result_manager = ResultManager("localhost", 3306, "root", "1234", "vote")
     result_manager.checkTime()
 
 
@@ -450,8 +450,8 @@ def create():
         # 투표 생성
         affected = db.update("""
         INSERT INTO Vote_Information 
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0)
-        """, (vote_id, namev, get_jwt_identity(), vote_code, startv, endv, permissionv, limit, 0))
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0, 0)
+        """, (vote_id, namev, get_jwt_identity(), vote_code, startv, endv, permissionv, limit))
         
         affected_item = db.update("""
         INSERT INTO Vote_Item 
@@ -463,7 +463,13 @@ def create():
             for target in targetv:
                 try:
                     db.update("""
-                    INSERT INTO Vote_User VALUES (%s, %s, %s)
+                    INSERT INTO Vote_User
+                    VALUES (
+                        (
+                            SELECT UserIDSeq
+                            FROM UserTable
+                            WHERE UserID = %s 
+                        ), %s, %s)
                     """, (target, vote_id, 0))
                 except Exception as e:
                     log(e)
@@ -523,8 +529,18 @@ def result(code):
               AND UserIDSeq = %s
         """, (vote_id, sid))
 
+        # 참여 기록이 없는 경우
         if join_check[0]["COUNT"] == 0:
-            return jsonify({"code": 6}), 404
+            join_check = db.execute("""
+            SELECT COUNT(*) AS COUNT
+            FROM Vote_Information
+            WHERE Vote_JoinCode = %s
+                  AND UserID = %s
+            """, (code, sid))
+            
+            # 투표 개설자가 아닌 경우
+            if join_check[0]["COUNT"] == 0:
+                return jsonify({"code": 6}), 404
 
         # 투표 결과 확인
         vote_result = db.execute("""
@@ -814,7 +830,7 @@ def vote_info(code):
             """, (vote_data[0]["UniqueNumberSeq"], sid))
 
             # 참여자 명단에 ID가 없을 경우
-            if check.pop()["COUNT"] is not 1:
+            if check.pop()["COUNT"] != 0:
                 return jsonify({"code": 5, "data": {}}), 401
         # 아무나 참여 가능한 투표인 경우
         else:
@@ -827,8 +843,8 @@ def vote_info(code):
         WHERE UniqueNumberSeq = %s
         """, (vote_data[0]["UniqueNumberSeq"]))
 
-        # 참여자 제한이 0인 경우 제한 없음, 5 이상인 경우 제한 있음
-        if total[0]["VoteLimit"] >= 5:
+        # 참여자 제한이 0인 경우 제한 없음, 0이 아닌 경우 제한 있음
+        if total[0]["VoteLimit"] != 0:
             # 현재 참여자 수
             participated = db.execute("""
             SELECT COUNT(*) AS COUNT 
@@ -942,4 +958,6 @@ if __name__ == "__main__":
     process = multiprocessing.Process(target=result_process, args=())
     process.start()
     log("서버 시작 됨")
-    app.run(debug=False, host='0.0.0.0', port='80')
+    app.run(debug=False, host='0.0.0.0', ssl_context=\
+    ('/etc/letsencrypt/live/www.coidroid.com/cert.pem',\
+    '/etc/letsencrypt/live/www.coidroid.com/key.pem'), port=7777)

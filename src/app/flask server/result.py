@@ -7,8 +7,8 @@ import urllib.parse
 
 class ResultManager():
 
-    def __init__(self):
-        self.db = database_manager("localhost", 3306, "root", "1234", "vote")
+    def __init__(self, host, port, user, password, database):
+        self.db = database_manager(host, port, user, password, database)
 
     
     def checkTime(self):
@@ -57,8 +57,6 @@ class ResultManager():
                     print("해시 불일치")
 
                 prev_hash = data["hash"]
-            
-            print(vote_id, count)
 
             # 결과 DB에 개표결과 저장
             for k in count.keys():
