@@ -7,7 +7,6 @@ from flask import Flask, request, render_template, send_from_directory, jsonify,
 from database import database_manager
 from result import ResultManager
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from flask_sslify import SSLify
 import datetime
 import hashlib
 import random
@@ -18,9 +17,6 @@ import multiprocessing
 import urllib.parse
 
 app = Flask(__name__)
-
-# HTTP 요청을 HTTPS 요청으로 리다이렉트
-sslify = SSLify(app)
 
 md5 = hashlib.md5()
 md5.update("sample".encode())
