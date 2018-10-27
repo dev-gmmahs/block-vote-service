@@ -24,7 +24,7 @@
             <div v-if="view === 3">
               <img class="info-img" src="@/assets/simple.png">
               <br>
-              블록체인의 작업증명 알고리즘을 적용하여 안전합니다.<br><br>
+              투표에 쉽게 참여할 수 있습니다.<br><br>
               투표소에 이동하지 않아도 PC, 태블릿, 모바일 등<br>
               여러 환경의 플랫폼에서 간단하게 참여 가능합니다.
             </div>
@@ -60,6 +60,34 @@ export default {
 
 .info-img {
   width: 50%;
+}
+
+.hover-menu {
+  position: relative;
+  margin: 5px auto;
+  cursor: pointer;
+  width: 200px;
+
+  .hidden {
+    pointer-events: none;
+    position: absolute;
+    padding: 10px;
+    box-sizing: border-box;
+    top: -120px;
+    width: 200px;
+    left: 0px;
+    background-color: rgba(0, 0, 0, .8);
+    color: #fff;
+    opacity: 0;
+    transition: .3s;
+  }
+
+  &:hover {
+
+    .hidden {
+      opacity: 1;
+    }
+  }
 }
 
 </style>

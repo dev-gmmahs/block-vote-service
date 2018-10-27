@@ -45,7 +45,7 @@
           </div>
           <transition name="fade" mode="out-in">
             <div class="input-area" v-if="limit === 1">
-              <input type="number" min="5" v-model.number="limitCount">
+              <input type="number" min="1" v-model.number="limitCount">
             </div>
           </transition>
           <hr>
@@ -92,21 +92,28 @@
           <h3>{{ msg }}</h3>
           <button class="able" @click="view = 1">뒤로가기</button>
         </div>
-        <div v-else-if="view === 3">
+        <div class="created" v-else-if="view === 3">
           <h2>투표가 생성되었습니다</h2>
           <div class="message-area">
-            <p>투표 코드</p>
-            <h1>{{ voteCode }}</h1>
+            <p style="color: #888;">투표 코드</p>
+            <div class="created-vote-code">{{ voteCode }}</div>
+          </div>
+          <div class="code-copy">
+            <div class="copy" @click="copy">참여코드 복사</div>
+            <div class="kakao" @click="share">카카오톡 공유</div>
+            <div class="fb" @click="share">페이스북 공유</div>
           </div>
         </div>
       </transition>
-      <div class="message-area">
-        <transition name="fade" mode="out-in">
-          <b v-if="msg">{{ msg }}</b>
-        </transition>
-      </div>
-      <div class="message-area">
-        <a v-if="view !== 0 && view !== 3" @click="back">뒤로</a>
+      <div v-if="view !== 3">
+        <div class="message-area">
+          <transition name="fade" mode="out-in">
+            <b v-if="msg">{{ msg }}</b>
+          </transition>
+        </div>
+        <div class="message-area">
+          <a v-if="view !== 0 && view !== 3" @click="back">뒤로</a>
+        </div>
       </div>
       <router-link to="/">홈으로 이동</router-link>
     </div>
@@ -134,7 +141,7 @@ export default {
       voteTarget: 0,
       targetTemp: '',
       limit: 0,
-      limitCount: 5,
+      limitCount: 0,
       alreadyInList: false,
       msg: '',
       voteCode: '',
@@ -144,10 +151,24 @@ export default {
   components: {
     'item': Item
   },
+  watch: {
+    limit (newVal) {
+      if (newVal === 1) {
+        this.limitCount = 5
+      } else {
+        this.limitCount = 0
+      }
+    }
+  },
   /**
    * @description 컴포넌트 생성 직후 현재 시간 데이터 저장
    */
   created () {
+    if (!this.$store.state.voteCode || this.$store.state.voteData === {}) {
+      alert('잘못된 접근입니다')
+      this.$router.push({ path: '/' })
+    }
+
     for (let i = 0; i < 24; i++) {
       this.hours.push(i)
     }
@@ -396,6 +417,24 @@ export default {
         return
       }
       this.view--
+    },
+    /**
+     * @description 투표 참여코드 텍스트 복사
+     */
+    copy () {
+      const input = document.createElement('input')
+      document.body.appendChild(input)
+      input.value = this.voteCode
+      input.select()
+      document.execCommand('copy')
+      input.remove()
+      alert('복사되었습니다.')
+    },
+    /**
+     * @description SNS 공유 버튼 클릭
+     */
+    share () {
+      alert('아직 구현중인 기능입니다.')
     }
   }
 }
@@ -505,6 +544,61 @@ hr {
   &:hover {
     background-color: #ff6659 !important;
     color: #fff !important;
+  }
+}
+
+.created-vote-code {
+  color: #07aee3;
+  font-size: 1.5rem;
+}
+
+.created {
+  margin-top: 16%;
+}
+
+.code-copy {
+  display: inline-block;
+  margin: auto;
+  margin-top: 50px;
+  margin-bottom: 10px;
+
+  div {
+    cursor: pointer;
+    float: left;
+    height: 40px;
+    width: 100%;
+    margin: 5px 0;
+    line-height: 40px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: .2s;
+  }
+
+  .copy {
+    background-color: #eee;
+    color: #777;
+
+    &:hover {
+      background-color: #ddd;
+    }
+  }
+
+  .kakao {
+    background-color: #fbe300;
+    color: #3a1e1b;
+
+    &:hover {
+      background-color: #d6c100;
+    }
+  }
+
+  .fb {
+    background-color: #395498;
+    color: #fff;
+
+    &:hover {
+      background-color: #2b4074;
+    }
   }
 }
 </style>

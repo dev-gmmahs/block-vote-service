@@ -7,10 +7,32 @@ import axios from 'axios'
 import Chart from 'chart.js'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faKey, faSignInAlt, faUserPlus, faHome, faUser, faPlusCircle, faHandPointLeft, faUserShield, faUsers, faSmileWink, faFrownOpen } from '@fortawesome/free-solid-svg-icons'
+import { faInfoCircle,
+  faKey,
+  faSignInAlt,
+  faUserPlus,
+  faHome,
+  faUser,
+  faPlusCircle,
+  faHandPointLeft,
+  faUserShield,
+  faUsers,
+  faSmileWink,
+  faFrownOpen } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add([faCoffee, faKey, faSignInAlt, faUserPlus, faHome, faUser, faPlusCircle, faHandPointLeft, faUserShield, faUsers, faSmileWink, faFrownOpen])
+library.add([faInfoCircle,
+  faKey,
+  faSignInAlt,
+  faUserPlus,
+  faHome,
+  faUser,
+  faPlusCircle,
+  faHandPointLeft,
+  faUserShield,
+  faUsers,
+  faSmileWink,
+  faFrownOpen])
 Vue.component('fa-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false

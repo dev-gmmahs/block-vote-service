@@ -136,6 +136,8 @@ html, body {
     resize: none;
     outline: none;
     border: 2px solid #eee;
+    width: 80%;
+    height: 100px;
     padding: 8px 14px;
     background-color: transparent;
     color: #888;
@@ -298,10 +300,10 @@ html, body {
 }
 
 @media screen and (max-width: 768px) {
-    .modal-container {
-      width: 90%;
-    }
+  .modal-container {
+    width: 90%;
   }
+}
 
 .modal-header {
   margin-top: 0;

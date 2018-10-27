@@ -56,7 +56,8 @@
       </div>
     </div>
     <footer>
-      <div>Copyright (c) 2018 GMMAHS Community</div>
+      <div class="project-info" @click="github"><fa-icon icon="info-circle"/> 프로젝트 정보</div>
+      <h5>Copyright ⓒ 2018 GMMAHS Community</h5>
     </footer>
   </div>
 </template>
@@ -156,6 +157,9 @@ export default {
     modal (view) {
       this.open = true
       this.modalView = view
+    },
+    github () {
+      window.open('https://github.com/dev-gmmahs/block-vote-service', '_blank')
     }
   }
 }
@@ -357,4 +361,12 @@ export default {
   color: antiquewhite;
 }
 
+.project-info {
+  margin-top: 10px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
 </style>
