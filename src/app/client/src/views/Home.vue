@@ -125,13 +125,10 @@ export default {
         }
 
         */
-        if (result.data.code === 0) {
-          this.$store.commit('SET_VOTE_CODE', this.joinCode)
-          this.$store.commit('SET_VOTE_DATA', result.data.data)
-          this.$router.push({ path: '/vote' })
-        } else {
-          alert('참여 실패')
-        }
+        
+        this.$store.commit('SET_VOTE_CODE', this.joinCode)
+        this.$store.commit('SET_VOTE_DATA', result.data.data)
+        this.$router.push({ path: '/vote' })
       }).catch(e => {
         const code = e.response.data.code
         if (code === 2) {

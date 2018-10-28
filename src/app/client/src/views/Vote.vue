@@ -112,11 +112,11 @@ export default {
       setTimeout(() => {
         const date = new Date()
         const year = date.getFullYear()
-        const month = date.getMonth() + 1
-        const day = date.getDate()
-        const hour = date.getHours()
-        const min = date.getMinutes()
-        const sec = date.getSeconds()
+        const month = this.toZero(date.getMonth() + 1)
+        const day = this.toZero(date.getDate())
+        const hour = this.toZero(date.getHours())
+        const min = this.toZero(date.getMinutes())
+        const sec = this.toZero(date.getSeconds())
 
         let data = {
           vote: btoa(encodeURIComponent(this.selectItem)), // Base64 인코딩
@@ -195,6 +195,14 @@ export default {
           }, 750)
         })
       }, 500)
+    },
+    toZero (n) {
+      n = n.toString()
+      if (n.length === 2) {
+        return n
+      } else {
+        return '0' + n
+      }
     }
   }
 }
