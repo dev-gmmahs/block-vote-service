@@ -946,4 +946,6 @@ if __name__ == "__main__":
     log("데이터베이스 인스턴스 생성")
     db = database_manager("localhost", 3306, "root", "1234", "vote")
     log("서버 시작 됨")
-    app.run(debug=False, host="0.0.0.0", port=7778)
+    app.run(debug=False, host="0.0.0.0", port=7778, ssl_context=\
+    ("/etc/letsencrypt/live/www.coidroid.com/cert.pem",\
+    "/etc/letsencrypt/live/www.coidroid.com/privkey.pem"))
