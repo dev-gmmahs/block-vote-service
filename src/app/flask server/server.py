@@ -1,11 +1,9 @@
 # flask
 # pymysql
 # flask_jwt_extended
-# Flask-SSLify
 
 from flask import Flask, request, render_template, send_from_directory, jsonify, redirect
 from database import database_manager
-from result import ResultManager
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import datetime
 import hashlib
@@ -24,7 +22,6 @@ app.config["JWT_SECRET_KEY"] = md5.hexdigest()
 jwt = JWTManager(app)
 
 db = None
-result_manager = None
 
 
 # 로그 출력 함수
@@ -57,13 +54,6 @@ def randString(length):
     return "".join(random.SystemRandom().choice(string.ascii_uppercase +\
     string.ascii_lowercase +\
     string.digits) for _ in range(length))
-
-
-# 투표 결과 계산 프로세스
-def result_process():
-    result_manager = ResultManager("localhost", 3306, "root", "1234", "vote")
-    result_manager.checkTime()
-
 
 
 @app.route("/", methods=["GET"])
@@ -955,10 +945,5 @@ if __name__ == "__main__":
     # 데이터베이스 인스턴스 생성
     log("데이터베이스 인스턴스 생성")
     db = database_manager("localhost", 3306, "root", "1234", "vote")
-    log("투표 결과검증 프로세스 생성 및 시작")
-    process = multiprocessing.Process(target=result_process, args=())
-    process.start()
     log("서버 시작 됨")
-    app.run(debug=False, host="0.0.0.0", ssl_context=\
-    ("/etc/letsencrypt/live/www.coidroid.com/cert.pem",\
-    "/etc/letsencrypt/live/www.coidroid.com/privkey.pem"), port=7778)
+    app.run(debug=False, host="0.0.0.0", port=7778)

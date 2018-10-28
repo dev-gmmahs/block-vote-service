@@ -330,6 +330,7 @@ export default {
 </script>
 
 <style lang="scss">
+
 .chart-area {
   width: 100%;
   padding: 10px;

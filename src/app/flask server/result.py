@@ -1,3 +1,9 @@
+"""
+Crontab 작업
+
+0 * * * * python3 result.py
+"""
+
 from database import database_manager
 import threading
 import datetime
@@ -12,9 +18,11 @@ class ResultManager():
 
     
     def checkTime(self):
-        print("투표 종료 확인")
-        # 600초(10분)에 한 번씩 checkTime 호출
-        threading.Timer(600, self.checkTime).start()
+        now = datetime.datetime.now()
+        date = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        print("- - - [{}] Vote result check".format(date))
+
         now = datetime.datetime.now()
         result = self.db.execute("""
         SELECT UniqueNumberSeq
@@ -25,7 +33,7 @@ class ResultManager():
 
         for vote in result:
             vote_id = vote["UniqueNumberSeq"]
-            print("종료된 투표: {}".format(vote_id))
+            print("Vote ended: {}".format(vote_id))
             vote_datas = self.db.execute("""
             SELECT Vote_Item AS item,
                    Vote_JoinDate AS date,
@@ -54,7 +62,7 @@ class ResultManager():
                     else: 
                         count[item] = 1
                 else:
-                    print("해시 불일치")
+                    print("Hash is incorrect")
 
                 prev_hash = data["hash"]
 
@@ -71,3 +79,15 @@ class ResultManager():
             SET VoteFinished = 1
             WHERE UniqueNumberSeq = %s
             """, (vote_id))
+
+    
+    def close(self):
+        try:
+            self.db.close()
+        except Exception as e:
+            print(e)
+
+
+result_manager = ResultManager("localhost", 3306, "root", "1234", "vote")
+result_manager.checkTime()
+result_manager.close()

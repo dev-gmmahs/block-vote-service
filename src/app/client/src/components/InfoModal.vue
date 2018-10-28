@@ -58,6 +58,12 @@ export default {
   overflow-y: auto;
 }
 
+@media screen and (max-width: 768px) {
+  .modal-container-2 {
+    width: 90%;
+  }
+}
+
 .info-img {
   width: 50%;
 }
