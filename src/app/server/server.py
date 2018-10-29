@@ -13,6 +13,7 @@ import base64
 import datetime
 import multiprocessing
 import urllib.parse
+import os
 
 app = Flask(__name__)
 
@@ -22,6 +23,7 @@ app.config["JWT_SECRET_KEY"] = md5.hexdigest()
 jwt = JWTManager(app)
 
 db = None
+log_file_name = ""
 
 
 # 로그 출력 함수
@@ -29,7 +31,17 @@ def log(msg, ip=None):
     if not ip:
         ip = "00.00.00.00"
     date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print("{} - - [{}] {}".format(ip, date, msg))
+
+    log_message = "{} - - [{}] {}".format(ip, date, msg)
+
+    # 로그 기록 저장
+    try:
+        with open("./log/" + log_file_name, "a", encoding="utf-8") as f:
+            f.write(log_message + "\n")
+    except Exception as e:
+        print(e)
+
+    print(log_message)
 
 
 # 토큰 검증
@@ -942,10 +954,15 @@ def redirect_home(name):
 
 
 if __name__ == "__main__":
+    # 로그 파일 명 지정
+    log_file_name = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S") + ".log"
+    log("로그 파일 명: " + log_file_name)
+
     # 데이터베이스 인스턴스 생성
-    log("데이터베이스 인스턴스 생성")
     db = database_manager("localhost", 3306, "root", "1234", "vote")
+    log("데이터베이스 인스턴스 생성")
+
     log("서버 시작 됨")
     app.run(debug=False, host="0.0.0.0", port=7778, ssl_context=\
     ("/etc/letsencrypt/live/www.coidroid.com/cert.pem",\
-    "/etc/letsencrypt/live/www.coidroid.com/privkey.pem"))
+    "/etc/letsencrypt/live/www.coidroid.com/privkey.pem"))    
