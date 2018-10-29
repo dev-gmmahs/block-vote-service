@@ -56,6 +56,7 @@ def accessCheck(sid, token):
         if result:
             return True
         else:
+            log("인증에 실패하였습니다")
             return False
     except:
         return False
@@ -186,6 +187,9 @@ def vote():
 
         checkHash = hashlib.sha256(hashingData).hexdigest()
 
+        log("원본 해시: " + req["hash"])
+        log("서버 해시: " + checkHash)
+
         if checkHash != req["hash"]:
             log("투표 데이터 해시가 일치하지 않습니다")
             return jsonify({"success": False, "code": 40}), 403
@@ -201,6 +205,7 @@ def vote():
 
         # 이전 블록이 없을 경우 해시는 빈 값으로 지정
         if not prev_data:
+            log("Genesis block")
             prev_hash = ""
         else:
             prev_hash = prev_data[0]["hash"]
@@ -244,6 +249,7 @@ def vote():
                 log("User: {} 참여 실패".format(sid))
                 return jsonify({"success": False, "code": 99}), 404
         else:
+            log("투표 항목이 존재하지 않습니다")
             return jsonify({"success": False, "code": 98}), 404
     except Exception as e:
         log(e)
@@ -282,6 +288,7 @@ def regist():
         """, (id_))) > 0 else False
 
         if already:
+            log("이미 존재하는 ID 입니다")
             return jsonify({"success": False, "already": True}), 200
         
         result = db.update("""
@@ -324,6 +331,7 @@ def login():
             log("알 수 없는 유저입니다.")
             return jsonify({"msg": "아이디와 비밀번호를 확인해주세요"}), 404
         elif len(result) > 1:
+            log("동일한 유저가 2명 이상 존재합니다. 관리자에게 문의하세요")
             return jsonify({"msg": "유저 데이터 에러, 관리자에게 문의하세요"}), 500
 
         db.update("""
@@ -463,6 +471,7 @@ def create():
 
         # 지정된 투표자만 투표가 가능할 경우 명단에 ID 추가
         if permissionv == 1:
+            log("투표 참여자 ID 등록")
             for target in targetv:
                 try:
                     db.update("""
@@ -485,6 +494,7 @@ def create():
 
         # 투표 정보 추가 또는 투표 항목 추가를 실패한 경우
         if affected == 0 or affected_item == 0:
+            log("투표 정보 또는 투표 항목을 추가하지 못했습니다")
             return jsonify({"code": 70}), 500
 
         # 정상적으로 처리 됨
@@ -534,6 +544,7 @@ def result(code):
 
         # 참여 기록이 없는 경우
         if join_check[0]["COUNT"] == 0:
+            log("투표 참여 기록이 존재하지 않습니다")
             join_check = db.execute("""
             SELECT COUNT(*) AS COUNT
             FROM Vote_Information
@@ -556,6 +567,7 @@ def result(code):
 
         # 투표 결과가 없을 경우
         if len(vote_result) == 0:
+            log("투표 결과가 존재하지 않습니다")
             return jsonify({"code": 7}), 403
 
         return jsonify({
@@ -818,7 +830,7 @@ def vote_info(code):
         """, (vote_data[0]["UniqueNumberSeq"], sid))
 
         if already[0]["COUNT"] != 0:
-            log("이미 참여한 유저입니다.")
+            log("이미 참여한 유저입니다")
             return jsonify({"code": 50, "data": {}}), 403
         
 
@@ -827,13 +839,14 @@ def vote_info(code):
             check = db.execute("""
             SELECT COUNT(*) AS COUNT 
             FROM Vote_User 
-            WHERE UniqueNumberSeq = %s 
-                  AND UserID = (SELECT UserID FROM UserTable WHERE UserIDSeq = %s) 
+            WHERE UniqueNumberSeq = %s
+                  AND UserIDSeq = %s
                   AND JoinAlready = 0
             """, (vote_data[0]["UniqueNumberSeq"], sid))
 
             # 참여자 명단에 ID가 없을 경우
             if check.pop()["COUNT"] != 0:
+                log("참여자 명단에 존재하지 않습니다.")
                 return jsonify({"code": 5, "data": {}}), 401
         # 아무나 참여 가능한 투표인 경우
         else:
@@ -858,6 +871,7 @@ def vote_info(code):
 
             # 만약 현재 참여자 수가 전체 참여자수보다 크거나 같을 경우 더이상 참여 불가능
             if total[0]["VoteLimit"] <= participated[0]["COUNT"]:
+                log("투표 참여자 수가 초과되었습니다.")
                 return jsonify({"code": 4, "data": {}}), 200
 
         # 투표 항목 조회
@@ -917,6 +931,7 @@ def block_info(code):
 
         # 블록이 없을 경우
         if len(blocks) == 0:
+            log("블록 데이터가 존재하지 않습니다.")
             return jsonify({"code": 8}), 404
 
         return jsonify({"code": 0, "block": blocks}), 200

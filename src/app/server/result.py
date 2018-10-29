@@ -15,13 +15,28 @@ class ResultManager():
 
     def __init__(self, host, port, user, password, database):
         self.db = database_manager(host, port, user, password, database)
+        self.log_file_name = datetime.datetime.now().strftime("%Y-%m-%d %H_%M_%S") + "_result.log"
 
+
+    def log(self, msg):
+        date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        log_message = "- - - [{}] {}".format(date, msg)
+
+        # 로그 기록 저장
+        try:
+            with open("./log/" + self.log_file_name, "a", encoding="utf-8") as f:
+                f.write(log_message + "\n")
+        except Exception as e:
+            print(e)
+
+        print(log_message)
     
+
     def checkTime(self):
         now = datetime.datetime.now()
-        date = now.strftime("%Y-%m-%d %H:%M:%S")
 
-        print("- - - [{}] Vote result check".format(date))
+        self.log("Vote result check")
 
         now = datetime.datetime.now()
         result = self.db.execute("""
@@ -33,7 +48,7 @@ class ResultManager():
 
         for vote in result:
             vote_id = vote["UniqueNumberSeq"]
-            print("Vote ended: {}".format(vote_id))
+            self.log("Vote ended: {}".format(vote_id))
             vote_datas = self.db.execute("""
             SELECT Vote_Item AS item,
                    Vote_JoinDate AS date,
@@ -62,7 +77,7 @@ class ResultManager():
                     else: 
                         count[item] = 1
                 else:
-                    print("Hash is incorrect")
+                    self.log("Hash is incorrect")
 
                 prev_hash = data["hash"]
 

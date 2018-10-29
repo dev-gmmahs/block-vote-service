@@ -56,7 +56,7 @@ CREATE TABLE Vote_Information (
 
 CREATE TABLE Vote_Item (
   UniqueNumberSeq VARCHAR(20) NOT NULL, -- 투표 고유번호
-  Vote_Item VARCHAR(300) NOT NULL,      -- 투표 항목
+  Vote_Item VARCHAR(800) NOT NULL,      -- 투표 항목
   PRIMARY KEY(UniqueNumberSeq)
 );
 
