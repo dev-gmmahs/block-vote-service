@@ -845,7 +845,7 @@ def vote_info(code):
             """, (vote_data[0]["UniqueNumberSeq"], sid))
 
             # 참여자 명단에 ID가 없을 경우
-            if check.pop()["COUNT"] != 0:
+            if check[0]["COUNT"] == 0:
                 log("참여자 명단에 존재하지 않습니다.")
                 return jsonify({"code": 5, "data": {}}), 401
         # 아무나 참여 가능한 투표인 경우
