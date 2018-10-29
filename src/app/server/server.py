@@ -126,7 +126,7 @@ def vote():
         """, (voteCode))
 
         # 참여 가능 인원이 초과된 경우
-        if vote_info[0]["VoteLimit"] <= vote_limit[0]["COUNT"]:
+        if vote_info[0]["VoteLimit"] != 0 and vote_info[0]["VoteLimit"] <= vote_limit[0]["COUNT"]:
             log("해당 투표는 참여가능 인원이 가득 찼습니다")
             return jsonify({"success": False, "code": 4}), 401
 
