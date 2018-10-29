@@ -125,7 +125,6 @@ export default {
         }
 
         */
-        
         this.$store.commit('SET_VOTE_CODE', this.joinCode)
         this.$store.commit('SET_VOTE_DATA', result.data.data)
         this.$router.push({ path: '/vote' })

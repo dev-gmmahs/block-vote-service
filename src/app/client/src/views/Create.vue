@@ -326,8 +326,8 @@ export default {
      */
     addItem () {
       this.msg = ''
-      if (this.items.length === 10) {
-        this.msg = '항목은 최대 10개 까지 생성 가능합니다!'
+      if (this.items.length === 25) {
+        this.msg = '항목은 최대 25개 까지 생성 가능합니다!'
       } else {
         this.items.push('')
       }
