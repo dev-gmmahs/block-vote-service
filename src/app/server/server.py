@@ -474,15 +474,18 @@ def create():
             log("투표 참여자 ID 등록")
             for target in targetv:
                 try:
-                    db.update("""
-                    INSERT INTO Vote_User
-                    VALUES (
-                        (
-                            SELECT UserIDSeq
-                            FROM UserTable
-                            WHERE UserID = %s 
-                        ), %s, %s)
-                    """, (target, vote_id, 0))
+                    user = db.execute("""
+                    SELECT UserIDSeq
+                    FROM UserTable
+                    WHERE UserID = %s
+                    """, (target))
+
+                    if len(user) != 0:
+                        db.update("""
+                        INSERT INTO Vote_User
+                        VALUES (%s, %s, 0)
+                        """, (user[0]["UserIDSeq"], vote_id))
+
                 except Exception as e:
                     log(e)
 
