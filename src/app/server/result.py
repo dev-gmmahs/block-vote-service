@@ -72,7 +72,7 @@ class ResultManager():
                          str(data["nonce"])
 
                 hash = hashlib.sha256(string.encode("utf-8")).hexdigest()
-                intergrated_hash = hashlib.sha256(str(prev_hash + data["hash"]).encode("utf-8")).hexdigest()
+                intergrated_hash = hashlib.sha256(str(data["hash"] + prev_hash).encode("utf-8")).hexdigest()
                 self.log(intergrated_hash)
                 self.log(data["inter"])
                 if hash == data["hash"] and prev_hash == data["prev"] and data["inter"] == intergrated_hash:
