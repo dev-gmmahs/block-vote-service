@@ -872,7 +872,7 @@ def vote_info(code):
             # 만약 현재 참여자 수가 전체 참여자수보다 크거나 같을 경우 더이상 참여 불가능
             if total[0]["VoteLimit"] <= participated[0]["COUNT"]:
                 log("투표 참여자 수가 초과되었습니다.")
-                return jsonify({"code": 4, "data": {}}), 200
+                return jsonify({"code": 4, "data": {}}), 403
 
         # 투표 항목 조회
         item_data = db.execute("""
