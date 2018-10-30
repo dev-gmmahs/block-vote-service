@@ -150,9 +150,17 @@ export default {
 
       let labels = []
       let datas = []
+      let colors = []
+      let r
+      let g
+      let b
       data.forEach(d => {
         labels.push(d.item)
         datas.push(d.count)
+        r = Math.floor(Math.random() * 256)
+        g = Math.floor(Math.random() * 256)
+        b = Math.floor(Math.random() * 256)
+        colors.push(`rgb(${r},${g},${b})`)
       })
 
       this.resultChart = new this.$chart(ctx, {
@@ -162,16 +170,7 @@ export default {
           datasets: [
             {
               data: datas,
-              backgroundColor: ['#f44336',
-                '#1e88e5',
-                '#ffeb3b',
-                '#43a047',
-                '#cddc39',
-                '#8e24aa',
-                '#ff4081',
-                '#009688',
-                '#ffca28',
-                '#29b6f6'] // 색상 코드
+              backgroundColor: colors // 색상 코드
             }
           ]
         },
@@ -186,7 +185,17 @@ export default {
     createVoteDataChart () {
       const ctx = document.getElementById('vote-chart')
 
-      const labels = this.voteData.vote.map(d => d.item)
+      let r
+      let g
+      let b
+      let colors = []
+      const labels = this.voteData.vote.map(d => {
+        r = Math.floor(Math.random() * 256)
+        g = Math.floor(Math.random() * 256)
+        b = Math.floor(Math.random() * 256)
+        colors.push(`rgb(${r},${g},${b})`)
+        return d.item
+      })
       const data = this.voteData.vote.map(d => d.count)
 
       this.voteChart = new this.$chart(ctx, {
@@ -196,16 +205,7 @@ export default {
           datasets: [
             {
               data: data,
-              backgroundColor: ['#f44336',
-                '#1e88e5',
-                '#ffeb3b',
-                '#43a047',
-                '#cddc39',
-                '#8e24aa',
-                '#ff4081',
-                '#009688',
-                '#ffca28',
-                '#29b6f6'] // 색상 코드
+              backgroundColor: colors
             }
           ]
         },
