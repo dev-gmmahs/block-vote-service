@@ -210,6 +210,9 @@ def vote():
         else:
             prev_hash = prev_data[0]["hash"]
 
+        intergrated = hashlib.sha256(str(checkHash + prev_hash).encode("utf-8")).hexdigest()
+        log("통합 해시: " + intergrated)
+
         vote_item = db.execute("""
         SELECT Vote_Item 
         FROM Vote_Item 
@@ -220,9 +223,9 @@ def vote():
         if vote in vote_item.split(","):
             inserted = db.update("""
             INSERT INTO Vote_Data 
-            (UniqueNumberSeq, UserIDSeq, Vote_JoinDate, Vote_Item, nonce, Hash, Prev_Hash) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (voteCode, sid, currentTime, vote_undecode, nonce, req["hash"], prev_hash))
+            (UniqueNumberSeq, UserIDSeq, Vote_JoinDate, Vote_Item, nonce, Hash, Prev_Hash, intergrated_hash) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (voteCode, sid, currentTime, vote_undecode, nonce, req["hash"], prev_hash, intergrated))
             log("User: {} 투표 데이터 추가".format(sid))
 
             if inserted == 0:

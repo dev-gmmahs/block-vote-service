@@ -55,7 +55,8 @@ class ResultManager():
                    UniqueNumberSeq AS v_id,
                    nonce,
                    Hash AS hash,
-                   Prev_Hash AS prev
+                   Prev_Hash AS prev,
+                   intergrated_hash AS inter
             FROM Vote_Data
             WHERE UniqueNumberSeq = %s
             ORDER BY Vote_JoinDate
@@ -71,7 +72,10 @@ class ResultManager():
                          str(data["nonce"])
 
                 hash = hashlib.sha256(string.encode("utf-8")).hexdigest()
-                if hash == data["hash"] and prev_hash == data["prev"]:
+                intergrated_hash = hashlib.sha256(str(prev_hash + data["hash"]).encode("utf-8")).hexdigest()
+                self.log(intergrated_hash)
+                self.log(data["inter"])
+                if hash == data["hash"] and prev_hash == data["prev"] and data["inter"] == intergrated_hash:
                     if item in count:
                         count[item] += 1
                     else: 

@@ -37,6 +37,7 @@ CREATE TABLE Vote_Data (
   nonce INT NOT NULL,                        -- 난스
   Hash VARCHAR(64) NOT NULL,                 -- 해시
   Prev_Hash VARCHAR(64) NOT NULL,            -- 이전 해시
+  intergrated_hash VARCHAR(64) NOT NULL,     -- 해시 + 이전해시
   PRIMARY KEY(UniqueDataSeq)
 );
 
