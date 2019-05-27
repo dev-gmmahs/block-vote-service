@@ -257,6 +257,11 @@ export default {
       if (this.alreadySubmit) {
         return
       }
+
+      if (!this.check()) {
+        return
+      }
+
       this.alreadySubmit = true
       this.$http.post('/info/login/regist', {
         id: this.id,
