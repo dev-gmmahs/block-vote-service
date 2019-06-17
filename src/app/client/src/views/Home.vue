@@ -57,7 +57,7 @@
     </div>
     <footer>
       <div class="project-info" @click="github"><fa-icon icon="info-circle"/> 프로젝트 정보</div>
-      <h5>Copyright ⓒ 2018 GMMAHS Community</h5>
+      <h5>Copyright ⓒ 2019 Smart Factory Convergence</h5>
     </footer>
   </div>
 </template>
@@ -155,7 +155,7 @@ export default {
       this.modalView = view
     },
     github () {
-      window.open('https://github.com/dev-gmmahs/block-vote-service', '_blank')
+      //window.open('https://github.com/dev-gmmahs/block-vote-service', '_blank')
     }
   }
 }
