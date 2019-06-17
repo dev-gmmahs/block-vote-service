@@ -984,6 +984,4 @@ if __name__ == "__main__":
     log("데이터베이스 인스턴스 생성")
 
     log("서버 시작 됨")
-    app.run(debug=False, host="0.0.0.0", port=7778, ssl_context=\
-    ("/etc/letsencrypt/live/www.coidroid.com/cert.pem",\
-    "/etc/letsencrypt/live/www.coidroid.com/privkey.pem"))    
+    app.run(debug=False, host="0.0.0.0", port=7778)
