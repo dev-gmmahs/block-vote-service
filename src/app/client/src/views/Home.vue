@@ -4,7 +4,7 @@
     <div class="gradient-panel">
       <img src="@/assets/vote.png" class="vote-image">
       <div class="vote-code-area">
-        <h1 class="vote-join-text">투표에 참여하세요!</h1>
+        <h1 class="vote-join-text">투표에 참여하세요!!</h1>
         <div class="code-input-area">
           <input type="text" v-model.trim="joinCode" @keydown="keydown" placeholder="참여코드">
           <button @click="join"><fa-icon icon="hand-point-left"/></button>
