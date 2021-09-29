@@ -12,7 +12,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.1",
     "axios": "^0.18.0",
     "chart.js": "^2.7.3",
-    "i": "^0.3.6",
+    "i": "^0.3.7",
     "sha256": "^0.2.0",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
